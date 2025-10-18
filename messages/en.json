@@ -17,7 +17,11 @@
     "upcoming": "Upcoming",
     "breaking": "Breaking",
     "allCategories": "All Categories",
-    "today": "Today"
+    "today": "Today",
+    "new": "New",
+    "viewMore": "View More",
+    "viewAll": "View All",
+    "liveUpdate": "Live"
   },
   "navigation": {
     "home": "Home",
@@ -42,7 +46,11 @@
     "saudi-pro-league": "Saudi Pro League",
     "la-liga": "La Liga",
     "serie-a": "Serie A",
-    "bundesliga": "Bundesliga"
+    "bundesliga": "Bundesliga",
+    "features": "Features",
+    "miniGames": "Mini-Games",
+    "highlights": "Highlights",
+    "fantasy": "Fantasy"
   },
   "hero": {
     "stats": {
@@ -84,5 +92,51 @@
   "adUnit": {
     "closeAd": "Close ad",
     "adSpace": "Ad space - click to interact"
+  },
+  "sections": {
+    "features": "Features",
+    "interviews": "Interviews",
+    "latestVideos": "Latest Videos",
+    "liveScores": "Live Scores"
+  },
+  "sponsors": {
+    "leadPartner": "Lead Partner",
+    "creativityPartner": "Official Creativity Partner",
+    "officialBank": "Official Bank",
+    "officialSoftDrink": "Official Soft Drink",
+    "officialBeer": "Official Beer",
+    "cloudPartner": "Official Cloud & AI Partner",
+    "officialBall": "Official Ball",
+    "officialLicensee": "Official Licensee"
+  },
+  "features": {
+    "weekendQuestions": "Ten KEY questions for the weekend's matches",
+    "titleRace": "Title race is shaping up to be an absolute classic",
+    "matchweekPredictor": "Can you predict this weekend's Premier League results?",
+    "haalandAnalysis": "Analysis: Is Haaland somehow getting even better?",
+    "titleVote": "VOTE: Who do YOU think will win the 2025/26 title race?",
+    "whartonAnalysis": "Analysis: Wharton excelling as one of league's best midfielders"
+  },
+  "interviews": {
+    "angeWeeds": "Ange: Some look at the weeds, I look at what'...",
+    "marescaUpdate": "'SIX more weeks' - Maresca updates on...",
+    "angeTrophy": "Ange: My story always ends with a trophy",
+    "pepBreak": "Pep: I won't think about a break until 2035!",
+    "moyesPickford": "Moyes: Pickford is England's best...",
+    "howeInjuries": "Howe delivers Wissa and Livramento injury...",
+    "hurzelerMitoma": "Hurzeler: Mitoma ( Veltman could fea",
+    "angePostecoglou": "Ange Postecoglou",
+    "enzoMaresca": "Enzo Maresca",
+    "pepGuardiola": "Pep Guardiola",
+    "davidMoyes": "David Moyes",
+    "eddieHowe": "Eddie Howe",
+    "fabianHurzeler": "Fabian Hürzeler"
+  },
+  "videos": {
+    "haalandGoals": "Watch all NINE Haaland goals this season",
+    "zubimendiGoal": "ALL ANGLES: Zubimendi's Go",
+    "vintageCr7": "Vintage CR7",
+    "szoboszlaiBest": "Best of Szoboszl",
+    "fplChallenge": "Harry's FPL Challenge Team"
   }
 }

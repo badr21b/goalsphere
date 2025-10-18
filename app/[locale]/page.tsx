@@ -5,6 +5,11 @@ import { motion } from 'framer-motion'
 import HeaderNoI18n from '@/components/HeaderNoI18n'
 import AdUnitNoI18n from '@/components/AdUnitNoI18n'
 import ThreeColumnLayout from '@/components/ThreeColumnLayout'
+import SponsorsSection from '@/components/SponsorsSection'
+import FeaturesGrid from '@/components/FeaturesGrid'
+import InterviewsCarousel from '@/components/InterviewsCarousel'
+import LatestVideos from '@/components/LatestVideos'
+import LiveScoresTicker from '@/components/LiveScoresTicker'
 import { useTranslations } from '@/hooks/useTranslations'
 
 const categories = [
@@ -64,10 +69,13 @@ export default function HomePage() {
       {/* Header */}
       <HeaderNoI18n />
 
+      {/* Live Scores Ticker */}
+      <LiveScoresTicker />
+
       {/* Header Banner Ad */}
       {headerLoading && (
         <div className="bg-sport-gray/20 border-b border-gray-700/30 py-2">
-          <div className="container mx-auto px-4">
+          <div className="w-full px-4 sm:px-4 lg:max-w-7xl lg:mx-auto lg:px-8">
             <div className="h-16 bg-sport-gray/50 rounded-lg flex items-center justify-center">
               <span className="text-gray-400">Loading...</span>
             </div>
@@ -76,7 +84,7 @@ export default function HomePage() {
       )}
       {showAds && (
         <div className="bg-sport-gray/20 border-b border-gray-700/30 py-2">
-          <div className="container mx-auto px-4">
+          <div className="w-full px-4 sm:px-4 lg:max-w-7xl lg:mx-auto lg:px-8">
             <AdUnitNoI18n
               adUnit={fallbackAds.header}
               position="header"
@@ -87,15 +95,15 @@ export default function HomePage() {
       )}
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="w-full px-4 sm:px-4 lg:max-w-7xl lg:mx-auto lg:px-8 py-4 sm:py-6">
         {/* Category Filter */}
         <section className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">{t('home.latestNews')}</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">{t('home.latestNews')}</h2>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setSelectedCategory(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   !selectedCategory
                     ? 'bg-sport-red text-white'
                     : 'bg-sport-gray/50 text-gray-300 hover:bg-sport-gray/70'
@@ -107,7 +115,7 @@ export default function HomePage() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                     selectedCategory === category
                       ? 'bg-sport-red text-white'
                       : 'bg-sport-gray/50 text-gray-300 hover:bg-sport-gray/70'
@@ -142,10 +150,22 @@ export default function HomePage() {
         )}
       </main>
 
+      {/* Sponsors Section */}
+      <SponsorsSection />
+
+      {/* Features Grid */}
+      <FeaturesGrid />
+
+      {/* Interviews Carousel */}
+      <InterviewsCarousel />
+
+      {/* Latest Videos */}
+      <LatestVideos />
+
       {/* Footer Banner Ad */}
       {footerLoading && (
         <div className="bg-sport-gray/20 border-t border-gray-700/30 py-2">
-          <div className="container mx-auto px-4">
+          <div className="w-full px-4 sm:px-4 lg:max-w-7xl lg:mx-auto lg:px-8">
             <div className="h-20 bg-sport-gray/50 rounded-lg flex items-center justify-center">
               <span className="text-gray-400">Loading...</span>
             </div>
@@ -154,7 +174,7 @@ export default function HomePage() {
       )}
       {showAds && (
         <div className="bg-sport-gray/20 border-t border-gray-700/30 py-2">
-          <div className="container mx-auto px-4">
+          <div className="w-full px-4 sm:px-4 lg:max-w-7xl lg:mx-auto lg:px-8">
             <AdUnitNoI18n
               adUnit={fallbackAds.footer}
               position="footer"
@@ -166,10 +186,10 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="bg-sport-gray/30 border-t border-gray-700/50 py-8">
-        <div className="container mx-auto px-4 text-center text-gray-400">
+        <div className="w-full px-4 sm:px-4 lg:max-w-7xl lg:mx-auto lg:px-8 text-center text-gray-400">
           <h3 className="text-xl font-bold text-white mb-4">{t('footer.title')}</h3>
           <p className="mb-4">{t('footer.description')}</p>
-          <div className="flex justify-center gap-6 text-sm">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 text-sm">
             <a href="#" className="hover:text-white transition-colors">{t('footer.privacyPolicy')}</a>
             <a href="#" className="hover:text-white transition-colors">{t('footer.termsOfService')}</a>
             <a href="#" className="hover:text-white transition-colors">{t('footer.contactUs')}</a>
