@@ -16,7 +16,8 @@
     "finished": "انتهت",
     "upcoming": "قريباً",
     "breaking": "عاجل",
-    "allCategories": "جميع الفئات"
+    "allCategories": "جميع الفئات",
+    "today": "اليوم"
   },
   "navigation": {
     "home": "الرئيسية",
@@ -29,7 +30,8 @@
     "profile": "الملف الشخصي",
     "previousArticle": "المقال السابق",
     "nextArticle": "المقال التالي",
-    "goToSlide": "انتقل إلى الشريحة"
+    "goToSlide": "انتقل إلى الشريحة",
+    "viewAllMatches": "عرض جميع المباريات"
   },
   "categories": {
     "transfers": "الانتقالات",

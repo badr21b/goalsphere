@@ -16,7 +16,8 @@
     "finished": "Finished",
     "upcoming": "Upcoming",
     "breaking": "Breaking",
-    "allCategories": "All Categories"
+    "allCategories": "All Categories",
+    "today": "Today"
   },
   "navigation": {
     "home": "Home",
@@ -29,7 +30,8 @@
     "profile": "Profile",
     "previousArticle": "Previous article",
     "nextArticle": "Next article",
-    "goToSlide": "Go to slide"
+    "goToSlide": "Go to slide",
+    "viewAllMatches": "View all matches"
   },
   "categories": {
     "transfers": "Transfers",

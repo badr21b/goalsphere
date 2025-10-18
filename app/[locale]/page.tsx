@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import HeaderNoI18n from '@/components/HeaderNoI18n'
 import AdUnitNoI18n from '@/components/AdUnitNoI18n'
-import DynamicHero from '@/components/DynamicHero'
+import ThreeColumnLayout from '@/components/ThreeColumnLayout'
 import { useTranslations } from '@/hooks/useTranslations'
 
 const categories = [
@@ -88,13 +88,6 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        {/* Dynamic Hero Section */}
-        <DynamicHero 
-          selectedCategory={selectedCategory}
-          autoRotate={true}
-          rotationInterval={8000}
-        />
-
         {/* Category Filter */}
         <section className="mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -127,54 +120,26 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Articles Grid */}
-        <section className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <motion.article
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.1 }}
-                className="bg-sport-gray/80 backdrop-blur-sm border border-gray-700/30 rounded-xl overflow-hidden transition-all duration-300 hover:bg-sport-gray/90 hover:scale-105 hover:shadow-2xl hover:shadow-sport-red/20"
-              >
-                <div className="h-48 bg-gradient-to-br from-sport-red/20 to-sport-gold/20 flex items-center justify-center">
-                  <span className="text-gray-400">{t('home.imagePlaceholder', { number: i })}</span>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-white mb-3 text-lg">
-                    {t('home.articleTitle', { number: i })}
-                  </h3>
-                  <p className="text-gray-300 text-sm mb-4">
-                    {t('home.articleContent')}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-400">
-                    <span>{t('common.hoursAgo', { count: 2 })}</span>
-                    <span>1,234 {t('common.views')}</span>
-                  </div>
-                </div>
-              </motion.article>
-            ))}
-          </div>
+        {/* Three Column Layout */}
+        <ThreeColumnLayout selectedCategory={selectedCategory} />
 
-          {/* In-Content Ad after articles */}
-          {inContentLoading && (
-            <div className="mt-8">
-              <div className="h-32 bg-sport-gray/50 rounded-lg flex items-center justify-center">
-                <span className="text-gray-400">Loading...</span>
-              </div>
+        {/* In-Content Ad after main content */}
+        {inContentLoading && (
+          <div className="mt-8">
+            <div className="h-32 bg-sport-gray/50 rounded-lg flex items-center justify-center">
+              <span className="text-gray-400">Loading...</span>
             </div>
-          )}
-          {showAds && (
-            <div className="mt-8">
-              <AdUnitNoI18n
-                adUnit={fallbackAds.inContent}
-                position="in-content"
-                onAdClick={(adId) => console.log('In-content ad clicked:', adId)}
-              />
-            </div>
-          )}
-        </section>
+          </div>
+        )}
+        {showAds && (
+          <div className="mt-8">
+            <AdUnitNoI18n
+              adUnit={fallbackAds.inContent}
+              position="in-content"
+              onAdClick={(adId) => console.log('In-content ad clicked:', adId)}
+            />
+          </div>
+        )}
       </main>
 
       {/* Footer Banner Ad */}

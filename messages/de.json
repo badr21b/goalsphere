@@ -16,7 +16,8 @@
     "finished": "Beendet",
     "upcoming": "Bald",
     "breaking": "Eilmeldung",
-    "allCategories": "Alle Kategorien"
+    "allCategories": "Alle Kategorien",
+    "today": "Heute"
   },
   "navigation": {
     "home": "Startseite",
@@ -29,7 +30,8 @@
     "profile": "Profil",
     "previousArticle": "Vorheriger Artikel",
     "nextArticle": "Nächster Artikel",
-    "goToSlide": "Zu Folie gehen"
+    "goToSlide": "Zu Folie gehen",
+    "viewAllMatches": "Alle Spiele anzeigen"
   },
   "categories": {
     "transfers": "Transfers",

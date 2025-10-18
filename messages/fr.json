@@ -16,7 +16,8 @@
     "finished": "Terminé",
     "upcoming": "À venir",
     "breaking": "Urgent",
-    "allCategories": "Toutes les catégories"
+    "allCategories": "Toutes les catégories",
+    "today": "Aujourd'hui"
   },
   "navigation": {
     "home": "Accueil",
@@ -29,7 +30,8 @@
     "profile": "Profil",
     "previousArticle": "Article précédent",
     "nextArticle": "Article suivant",
-    "goToSlide": "Aller à la diapositive"
+    "goToSlide": "Aller à la diapositive",
+    "viewAllMatches": "Voir tous les matchs"
   },
   "categories": {
     "transfers": "Transferts",
