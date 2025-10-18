@@ -1,0 +1,469 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GoalSphere API",
+    "description": "API for GoalSphere - Arabic Football News Platform",
+    "version": "1.0.0",
+    "contact": {
+      "name": "GoalSphere Team",
+      "email": "api@goalsphere.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Development server"
+    },
+    {
+      "url": "https://goalsphere.com/api",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/articles": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "Get articles with pagination and filters",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of articles per page",
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by category",
+            "schema": { "type": "string", "enum": ["transfers", "analysis", "breaking", "premier-league", "champions-league", "saudi-pro-league", "la-liga", "serie-a", "bundesliga"] }
+          },
+          {
+            "name": "is_breaking",
+            "in": "query",
+            "description": "Filter breaking news",
+            "schema": { "type": "boolean" }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search in title and body",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Article" }
+                    },
+                    "count": { "type": "integer" },
+                    "page": { "type": "integer" },
+                    "limit": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "Get single article by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Article ID",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Article retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Article" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Article not found"
+          }
+        }
+      }
+    },
+    "/articles/breaking": {
+      "get": {
+        "tags": ["Articles"],
+        "summary": "Get breaking news articles",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of articles",
+            "schema": { "type": "integer", "default": 5 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Breaking news retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Article" }
+                    },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/live-scores": {
+      "get": {
+        "tags": ["Live Scores"],
+        "summary": "Get live scores and match data",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by match status",
+            "schema": { "type": "string", "enum": ["live", "finished", "upcoming"] }
+          },
+          {
+            "name": "league",
+            "in": "query",
+            "description": "Filter by league",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of matches",
+            "schema": { "type": "integer", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live scores retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/LiveScore" }
+                    },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "tags": ["Teams"],
+        "summary": "Get teams data",
+        "parameters": [
+          {
+            "name": "league",
+            "in": "query",
+            "description": "Filter by league",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of teams",
+            "schema": { "type": "integer", "default": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Team" }
+                    },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ad-units": {
+      "get": {
+        "tags": ["Ad Units"],
+        "summary": "Get ad units",
+        "parameters": [
+          {
+            "name": "position",
+            "in": "query",
+            "description": "Filter by position",
+            "schema": { "type": "string", "enum": ["header", "footer", "sidebar", "in-content"] }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter by type",
+            "schema": { "type": "string", "enum": ["banner", "in-article", "video"] }
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "description": "Filter active ads",
+            "schema": { "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ad units retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/AdUnit" }
+                    },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ingestion/start": {
+      "post": {
+        "tags": ["Content Ingestion"],
+        "summary": "Start content ingestion process",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": ["sportmonks", "api_football", "web_scraping"],
+                    "description": "Data source"
+                  },
+                  "categories": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Categories to fetch"
+                  },
+                  "force_refresh": {
+                    "type": "boolean",
+                    "description": "Force refresh existing data"
+                  }
+                },
+                "required": ["source"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ingestion started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "job_id": { "type": "string" },
+                    "results": {
+                      "type": "object",
+                      "properties": {
+                        "processed": { "type": "integer" },
+                        "created": { "type": "integer" },
+                        "updated": { "type": "integer" },
+                        "errors": { "type": "array", "items": { "type": "string" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Ingestion failed"
+          }
+        }
+      }
+    },
+    "/ingestion/status": {
+      "get": {
+        "tags": ["Content Ingestion"],
+        "summary": "Get ingestion job status",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "query",
+            "description": "Specific job ID",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "description": "Filter by source",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status",
+            "schema": { "type": "string", "enum": ["pending", "running", "completed", "failed"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/IngestionJob" }
+                    },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Article": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "image_url": { "type": "string", "format": "uri" },
+          "published_at": { "type": "string", "format": "date-time" },
+          "source": { "type": "string" },
+          "category": { "type": "string" },
+          "related_team_ids": { "type": "array", "items": { "type": "string" } },
+          "related_player_ids": { "type": "array", "items": { "type": "string" } },
+          "is_breaking": { "type": "boolean" },
+          "views": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Team": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "name_ar": { "type": "string" },
+          "logo_url": { "type": "string", "format": "uri" },
+          "league": { "type": "string" },
+          "country": { "type": "string" },
+          "founded": { "type": "integer" },
+          "stadium": { "type": "string" },
+          "website": { "type": "string", "format": "uri" },
+          "social_media": { "type": "object" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LiveScore": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "home_team": { "type": "string" },
+          "away_team": { "type": "string" },
+          "home_score": { "type": "integer" },
+          "away_score": { "type": "integer" },
+          "status": { "type": "string", "enum": ["live", "finished", "upcoming"] },
+          "league": { "type": "string" },
+          "minute": { "type": "integer" },
+          "start_time": { "type": "string", "format": "date-time" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AdUnit": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "type": { "type": "string", "enum": ["banner", "in-article", "video"] },
+          "position": { "type": "string", "enum": ["header", "footer", "sidebar", "in-content"] },
+          "content": { "type": "string" },
+          "is_active": { "type": "boolean" },
+          "target_category": { "type": "string" },
+          "click_count": { "type": "integer" },
+          "impression_count": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "IngestionJob": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "source": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "running", "completed", "failed"] },
+          "started_at": { "type": "string", "format": "date-time" },
+          "completed_at": { "type": "string", "format": "date-time" },
+          "articles_processed": { "type": "integer" },
+          "articles_created": { "type": "integer" },
+          "articles_updated": { "type": "integer" },
+          "errors": { "type": "array", "items": { "type": "string" } },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

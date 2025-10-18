@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap');
+
+@layer base {
+  html {
+    font-family: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
+  }
+  
+  body {
+    direction: ltr;
+    text-align: left;
+  }
+  
+  [dir="rtl"] body {
+    direction: rtl;
+    text-align: right;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .rtl-container {
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .ltr-container {
+    direction: ltr;
+    text-align: left;
+  }
+  
+  .hero-gradient {
+    background: linear-gradient(135deg, #37003C 0%, #1A1A1A 50%, #2D2D2D 100%);
+  }
+  
+  .pl-gradient {
+    background: linear-gradient(135deg, #37003C 0%, #FFD700 50%, #00D4AA 100%);
+  }
+  
+  .pl-card {
+    @apply bg-pl-gray/80 backdrop-blur-sm border border-pl-light-gray/30 rounded-xl overflow-hidden transition-all duration-300 hover:bg-pl-gray/90 hover:scale-105 hover:shadow-2xl hover:shadow-pl-purple/20;
+  }
+  
+  .pl-card-premium {
+    @apply bg-gradient-to-br from-pl-purple/20 to-pl-gray/80 backdrop-blur-sm border border-pl-gold/30 rounded-xl overflow-hidden transition-all duration-300 hover:bg-gradient-to-br hover:from-pl-purple/30 hover:to-pl-gray/90 hover:scale-105 hover:shadow-2xl hover:shadow-pl-gold/20;
+  }
+  
+  .breaking-news {
+    @apply border-r-4 border-pl-red bg-pl-red/10;
+  }
+  
+  .ticker-item {
+    @apply whitespace-nowrap px-4 py-2 text-sm font-medium;
+  }
+  
+  .ad-unit {
+    @apply bg-pl-dark/80 border border-pl-light-gray/30 rounded-lg p-4 text-center text-pl-light-gray text-sm;
+  }
+  
+  .pl-button {
+    @apply bg-gradient-to-r from-pl-purple to-pl-gold text-pl-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:from-pl-gold hover:to-pl-accent hover:scale-105 hover:shadow-lg hover:shadow-pl-gold/30;
+  }
+  
+  .pl-button-secondary {
+    @apply bg-pl-gray/80 border border-pl-gold/50 text-pl-gold px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-pl-gold hover:text-pl-dark hover:scale-105;
+  }
+  
+  .pl-nav-link {
+    @apply text-pl-white hover:text-pl-gold transition-colors duration-200 font-medium;
+  }
+  
+  .pl-nav-link-active {
+    @apply text-pl-gold border-b-2 border-pl-gold;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* RTL specific styles */
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+  margin-right: calc(1rem * var(--tw-space-x-reverse));
+  margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+/* Animation keyframes */
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
