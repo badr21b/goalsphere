@@ -1,11 +1,188 @@
 {
-    "meta": {
-      "project": "Global Football News & Live Data Aggregator",
-      "description": "Configuration of free and freemium football APIs for fetching news, live scores, fixtures, standings, and stats from major leagues (Premier League, Champions League, World Cup, Arab leagues, etc.).",
-      "version": "1.0",
-      "target_storage": "Supabase",
-      "mock_mode": true
+  "meta": {
+    "project": "Global Football News & Live Data Aggregator",
+    "description": "Configuration of free and freemium football APIs for fetching news, live scores, fixtures, standings, and stats from major leagues (Premier League, Champions League, World Cup, Arab leagues, etc.).",
+    "version": "1.0",
+    "target_storage": "Supabase",
+    "mock_mode": true
+  },
+  "unified_schema": {
+    "matches": {
+      "description": "Standardized match/fixture data structure for all APIs",
+      "required_fields": ["match_id", "league", "home_team", "away_team", "status", "timestamp"],
+      "optional_fields": ["score", "venue", "referee", "season", "matchday", "competition_id"],
+      "schema": {
+        "match_id": "string|number",
+        "league": "string",
+        "home_team": "string",
+        "away_team": "string",
+        "status": "string (Scheduled|Live|Finished|Postponed|Cancelled)",
+        "timestamp": "string (ISO 8601)",
+        "score": {
+          "home": "number|null",
+          "away": "number|null",
+          "half_time": {
+            "home": "number|null",
+            "away": "number|null"
+          }
+        },
+        "venue": "string|null",
+        "referee": "string|null",
+        "season": "string|number",
+        "matchday": "number|null",
+        "competition_id": "string|number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
     },
+    "teams": {
+      "description": "Standardized team data structure",
+      "required_fields": ["team_id", "name", "league"],
+      "optional_fields": ["logo", "country", "founded", "venue", "website"],
+      "schema": {
+        "team_id": "string|number",
+        "name": "string",
+        "league": "string",
+        "logo": "string|null",
+        "country": "string|null",
+        "founded": "number|null",
+        "venue": "string|null",
+        "website": "string|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    },
+    "leagues": {
+      "description": "Standardized league/competition data structure",
+      "required_fields": ["league_id", "name", "country"],
+      "optional_fields": ["logo", "type", "season", "current_matchday"],
+      "schema": {
+        "league_id": "string|number",
+        "name": "string",
+        "country": "string",
+        "logo": "string|null",
+        "type": "string|null",
+        "season": "string|number|null",
+        "current_matchday": "number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    },
+    "videos": {
+      "description": "Standardized video/highlight data structure",
+      "required_fields": ["video_id", "title", "competition", "embed_url"],
+      "optional_fields": ["thumbnail", "duration", "description", "match_id"],
+      "schema": {
+        "video_id": "string|number",
+        "title": "string",
+        "competition": "string",
+        "embed_url": "string",
+        "thumbnail": "string|null",
+        "duration": "number|null",
+        "description": "string|null",
+        "match_id": "string|number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    },
+    "standings": {
+      "description": "Standardized league standings data structure",
+      "required_fields": ["team_id", "position", "points", "league"],
+      "optional_fields": ["played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_difference"],
+      "schema": {
+        "team_id": "string|number",
+        "position": "number",
+        "points": "number",
+        "league": "string",
+        "played": "number|null",
+        "won": "number|null",
+        "drawn": "number|null",
+        "lost": "number|null",
+        "goals_for": "number|null",
+        "goals_against": "number|null",
+        "goal_difference": "number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    }
+  },
+  "field_mappings": {
+    "description": "How to map different API response fields to unified schema",
+    "api_football": {
+      "matches": {
+        "match_id": "fixture.id",
+        "league": "league.name",
+        "home_team": "teams.home.name",
+        "away_team": "teams.away.name",
+        "status": "fixture.status.short",
+        "timestamp": "fixture.date",
+        "score": {
+          "home": "goals.home",
+          "away": "goals.away"
+        },
+        "venue": "fixture.venue.name",
+        "referee": "fixture.referee",
+        "season": "league.season",
+        "matchday": "league.round"
+      }
+    },
+    "football_data_org": {
+      "matches": {
+        "match_id": "id",
+        "league": "competition.name",
+        "home_team": "homeTeam.name",
+        "away_team": "awayTeam.name",
+        "status": "status",
+        "timestamp": "utcDate",
+        "score": {
+          "home": "score.fullTime.home",
+          "away": "score.fullTime.away"
+        },
+        "venue": "venue",
+        "referee": "referees[0].name",
+        "season": "season.startDate",
+        "matchday": "matchday"
+      }
+    },
+    "sportmonks": {
+      "matches": {
+        "match_id": "id",
+        "league": "league.name",
+        "home_team": "home_team.name",
+        "away_team": "away_team.name",
+        "status": "status",
+        "timestamp": "time",
+        "score": {
+          "home": "score.home",
+          "away": "score.away"
+        }
+      }
+    },
+    "soccerdataapi": {
+      "matches": {
+        "match_id": "id",
+        "league": "league.name",
+        "home_team": "home.name",
+        "away_team": "away.name",
+        "status": "status",
+        "timestamp": "time",
+        "score": {
+          "home": "score.home",
+          "away": "score.away"
+        }
+      }
+    },
+    "scorebat": {
+      "videos": {
+        "video_id": "id",
+        "title": "title",
+        "competition": "competition",
+        "embed_url": "videos[0].embed",
+        "thumbnail": "thumbnail",
+        "description": "title"
+      }
+    }
+  },
     "apis": [
       {
         "name": "API-Football",
@@ -122,5 +299,143 @@
         "integration_notes": "Use for embedded highlights or preview content in your news feed. No key needed for basic feed."
       }
     ]
+  },
+  "supabase_tables": {
+    "description": "Target Supabase table schemas for data insertion",
+    "matches": {
+      "columns": {
+        "id": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+        "match_id": "text NOT NULL",
+        "league": "text NOT NULL",
+        "home_team": "text NOT NULL",
+        "away_team": "text NOT NULL",
+        "status": "text NOT NULL",
+        "timestamp": "timestamptz NOT NULL",
+        "score_home": "integer",
+        "score_away": "integer",
+        "venue": "text",
+        "referee": "text",
+        "season": "text",
+        "matchday": "integer",
+        "competition_id": "text",
+        "api_source": "text NOT NULL",
+        "raw_data": "jsonb",
+        "created_at": "timestamptz DEFAULT now()",
+        "updated_at": "timestamptz DEFAULT now()"
+      },
+      "indexes": ["match_id", "league", "timestamp", "status", "api_source"]
+    },
+    "teams": {
+      "columns": {
+        "id": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+        "team_id": "text NOT NULL",
+        "name": "text NOT NULL",
+        "league": "text NOT NULL",
+        "logo": "text",
+        "country": "text",
+        "founded": "integer",
+        "venue": "text",
+        "website": "text",
+        "api_source": "text NOT NULL",
+        "raw_data": "jsonb",
+        "created_at": "timestamptz DEFAULT now()",
+        "updated_at": "timestamptz DEFAULT now()"
+      },
+      "indexes": ["team_id", "name", "league", "api_source"]
+    },
+    "leagues": {
+      "columns": {
+        "id": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+        "league_id": "text NOT NULL",
+        "name": "text NOT NULL",
+        "country": "text NOT NULL",
+        "logo": "text",
+        "type": "text",
+        "season": "text",
+        "current_matchday": "integer",
+        "api_source": "text NOT NULL",
+        "raw_data": "jsonb",
+        "created_at": "timestamptz DEFAULT now()",
+        "updated_at": "timestamptz DEFAULT now()"
+      },
+      "indexes": ["league_id", "name", "country", "api_source"]
+    },
+    "videos": {
+      "columns": {
+        "id": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+        "video_id": "text NOT NULL",
+        "title": "text NOT NULL",
+        "competition": "text NOT NULL",
+        "embed_url": "text NOT NULL",
+        "thumbnail": "text",
+        "duration": "integer",
+        "description": "text",
+        "match_id": "text",
+        "api_source": "text NOT NULL",
+        "raw_data": "jsonb",
+        "created_at": "timestamptz DEFAULT now()",
+        "updated_at": "timestamptz DEFAULT now()"
+      },
+      "indexes": ["video_id", "competition", "match_id", "api_source"]
+    },
+    "standings": {
+      "columns": {
+        "id": "uuid PRIMARY KEY DEFAULT gen_random_uuid()",
+        "team_id": "text NOT NULL",
+        "position": "integer NOT NULL",
+        "points": "integer NOT NULL",
+        "league": "text NOT NULL",
+        "played": "integer",
+        "won": "integer",
+        "drawn": "integer",
+        "lost": "integer",
+        "goals_for": "integer",
+        "goals_against": "integer",
+        "goal_difference": "integer",
+        "api_source": "text NOT NULL",
+        "raw_data": "jsonb",
+        "created_at": "timestamptz DEFAULT now()",
+        "updated_at": "timestamptz DEFAULT now()"
+      },
+      "indexes": ["team_id", "league", "position", "api_source"]
+    }
+  },
+  "implementation_guide": {
+    "description": "Step-by-step guide for coding AIs to implement this configuration",
+    "steps": [
+      "1. Parse the football_apis_config.json file",
+      "2. For each API in the 'apis' array:",
+      "   a. Set up authentication headers from 'headers' section",
+      "   b. Make requests to endpoints listed in 'endpoints'",
+      "   c. Use 'field_mappings' to transform responses to 'unified_schema'",
+      "   d. Add 'api_source' field to identify data origin",
+      "   e. Store 'raw_data' for debugging/auditing",
+      "3. Validate transformed data against 'unified_schema' requirements",
+      "4. Insert normalized data into corresponding Supabase tables",
+      "5. Handle rate limits and errors gracefully",
+      "6. Implement data deduplication based on unique identifiers"
+    ],
+    "code_examples": {
+      "normalize_match_data": "function normalizeMatchData(apiResponse, apiName, fieldMapping) { /* Transform API response to unified schema */ }",
+      "validate_schema": "function validateSchema(data, schema) { /* Validate against unified schema */ }",
+      "insert_to_supabase": "function insertToSupabase(tableName, data) { /* Insert normalized data */ }"
+    }
+  },
+  "error_handling": {
+    "description": "Common error scenarios and handling strategies",
+    "rate_limits": {
+      "api_football": "100 requests/day - implement exponential backoff",
+      "football_data_org": "Limited free access - check response headers",
+      "sportmonks": "Test plan limits - monitor usage",
+      "soccerdataapi": "75 requests/day - batch requests efficiently",
+      "scorebat": "No limits - but respect server resources"
+    },
+    "common_errors": {
+      "authentication": "Check API keys and headers",
+      "rate_limit": "Implement retry logic with backoff",
+      "data_format": "Validate against schema before processing",
+      "network": "Implement timeout and retry mechanisms"
+    }
   }
+}
   

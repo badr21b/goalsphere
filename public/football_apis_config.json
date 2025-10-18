@@ -1,0 +1,302 @@
+{
+  "meta": {
+    "project": "Global Football News & Live Data Aggregator",
+    "description": "Configuration of free and freemium football APIs for fetching news, live scores, fixtures, standings, and stats from major leagues (Premier League, Champions League, World Cup, Arab leagues, etc.).",
+    "version": "1.0",
+    "target_storage": "Supabase",
+    "mock_mode": true
+  },
+  "unified_schema": {
+    "matches": {
+      "description": "Standardized match/fixture data structure for all APIs",
+      "required_fields": ["match_id", "league", "home_team", "away_team", "status", "timestamp"],
+      "optional_fields": ["score", "venue", "referee", "season", "matchday", "competition_id"],
+      "schema": {
+        "match_id": "string|number",
+        "league": "string",
+        "home_team": "string",
+        "away_team": "string",
+        "status": "string (Scheduled|Live|Finished|Postponed|Cancelled)",
+        "timestamp": "string (ISO 8601)",
+        "score": {
+          "home": "number|null",
+          "away": "number|null",
+          "half_time": {
+            "home": "number|null",
+            "away": "number|null"
+          }
+        },
+        "venue": "string|null",
+        "referee": "string|null",
+        "season": "string|number",
+        "matchday": "number|null",
+        "competition_id": "string|number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    },
+    "teams": {
+      "description": "Standardized team data structure",
+      "required_fields": ["team_id", "name", "league"],
+      "optional_fields": ["logo", "country", "founded", "venue", "website"],
+      "schema": {
+        "team_id": "string|number",
+        "name": "string",
+        "league": "string",
+        "logo": "string|null",
+        "country": "string|null",
+        "founded": "number|null",
+        "venue": "string|null",
+        "website": "string|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    },
+    "leagues": {
+      "description": "Standardized league/competition data structure",
+      "required_fields": ["league_id", "name", "country"],
+      "optional_fields": ["logo", "type", "season", "current_matchday"],
+      "schema": {
+        "league_id": "string|number",
+        "name": "string",
+        "country": "string",
+        "logo": "string|null",
+        "type": "string|null",
+        "season": "string|number|null",
+        "current_matchday": "number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    },
+    "videos": {
+      "description": "Standardized video/highlight data structure",
+      "required_fields": ["video_id", "title", "competition", "embed_url"],
+      "optional_fields": ["thumbnail", "duration", "description", "match_id"],
+      "schema": {
+        "video_id": "string|number",
+        "title": "string",
+        "competition": "string",
+        "embed_url": "string",
+        "thumbnail": "string|null",
+        "duration": "number|null",
+        "description": "string|null",
+        "match_id": "string|number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    },
+    "standings": {
+      "description": "Standardized league standings data structure",
+      "required_fields": ["team_id", "position", "points", "league"],
+      "optional_fields": ["played", "won", "drawn", "lost", "goals_for", "goals_against", "goal_difference"],
+      "schema": {
+        "team_id": "string|number",
+        "position": "number",
+        "points": "number",
+        "league": "string",
+        "played": "number|null",
+        "won": "number|null",
+        "drawn": "number|null",
+        "lost": "number|null",
+        "goals_for": "number|null",
+        "goals_against": "number|null",
+        "goal_difference": "number|null",
+        "api_source": "string",
+        "raw_data": "object"
+      }
+    }
+  },
+  "field_mappings": {
+    "description": "How to map different API response fields to unified schema",
+    "api_football": {
+      "matches": {
+        "match_id": "fixture.id",
+        "league": "league.name",
+        "home_team": "teams.home.name",
+        "away_team": "teams.away.name",
+        "status": "fixture.status.short",
+        "timestamp": "fixture.date",
+        "score": {
+          "home": "goals.home",
+          "away": "goals.away"
+        },
+        "venue": "fixture.venue.name",
+        "referee": "fixture.referee",
+        "season": "league.season",
+        "matchday": "league.round"
+      }
+    },
+    "football_data_org": {
+      "matches": {
+        "match_id": "id",
+        "league": "competition.name",
+        "home_team": "homeTeam.name",
+        "away_team": "awayTeam.name",
+        "status": "status",
+        "timestamp": "utcDate",
+        "score": {
+          "home": "score.fullTime.home",
+          "away": "score.fullTime.away"
+        },
+        "venue": "venue",
+        "referee": "referees[0].name",
+        "season": "season.startDate",
+        "matchday": "matchday"
+      }
+    },
+    "sportmonks": {
+      "matches": {
+        "match_id": "id",
+        "league": "league.name",
+        "home_team": "home_team.name",
+        "away_team": "away_team.name",
+        "status": "status",
+        "timestamp": "time",
+        "score": {
+          "home": "score.home",
+          "away": "score.away"
+        }
+      }
+    },
+    "soccerdataapi": {
+      "matches": {
+        "match_id": "id",
+        "league": "league.name",
+        "home_team": "home.name",
+        "away_team": "away.name",
+        "status": "status",
+        "timestamp": "time",
+        "score": {
+          "home": "score.home",
+          "away": "score.away"
+        }
+      }
+    },
+    "scorebat": {
+      "videos": {
+        "video_id": "id",
+        "title": "title",
+        "competition": "competition",
+        "embed_url": "videos[0].embed",
+        "thumbnail": "thumbnail",
+        "description": "title"
+      }
+    }
+  },
+  "apis": [
+    {
+      "name": "API-Football",
+      "base_url": "https://v3.football.api-sports.io",
+      "free_tier": "100 requests/day",
+      "coverage": ["Premier League", "Champions League", "World Cup", "La Liga", "Serie A", "Ligue 1", "Arab leagues"],
+      "endpoints": {
+        "live_matches": "/fixtures?live=all",
+        "fixtures_by_league": "/fixtures?league={league_id}&season={year}",
+        "standings": "/standings?league={league_id}&season={year}",
+        "teams": "/teams?league={league_id}&season={year}",
+        "players": "/players?team={team_id}&season={year}"
+      },
+      "headers": {
+        "x-apisports-key": "<YOUR_API_KEY>"
+      },
+      "response_mock": {
+        "fixture_id": 12345,
+        "league": "Premier League",
+        "home_team": "Arsenal",
+        "away_team": "Chelsea",
+        "score": { "home": 2, "away": 1 },
+        "status": "Live"
+      },
+      "integration_notes": "Use for comprehensive global data. Convert response to Supabase 'matches', 'teams', and 'leagues' tables."
+    },
+    {
+      "name": "Football-Data.org",
+      "base_url": "https://api.football-data.org/v4",
+      "free_tier": "Limited access, free plan available",
+      "coverage": ["Premier League", "Champions League", "Europa League", "World Cup"],
+      "endpoints": {
+        "competitions": "/competitions",
+        "matches": "/matches?competitions={competition_code}",
+        "teams": "/teams/{team_id}",
+        "standings": "/competitions/{competition_code}/standings"
+      },
+      "headers": {
+        "X-Auth-Token": "<YOUR_API_KEY>"
+      },
+      "response_mock": {
+        "competition": "PL",
+        "matchday": 9,
+        "homeTeam": "Liverpool",
+        "awayTeam": "Manchester United",
+        "score": { "fullTime": { "home": 3, "away": 2 } }
+      },
+      "integration_notes": "Best for official competitions. Data is clean and well-structured."
+    },
+    {
+      "name": "SportMonks Football API",
+      "base_url": "https://api.sportmonks.com/v3/football",
+      "free_tier": "Selected leagues only (test plan)",
+      "coverage": ["Premier League", "Champions League", "La Liga", "World Cup"],
+      "endpoints": {
+        "live_scores": "/livescores",
+        "fixtures": "/fixtures/date/{YYYY-MM-DD}",
+        "teams": "/teams/{team_id}",
+        "leagues": "/leagues"
+      },
+      "headers": {
+        "Authorization": "Bearer <YOUR_API_TOKEN>"
+      },
+      "response_mock": {
+        "id": 999,
+        "league": "Champions League",
+        "home_team": "Real Madrid",
+        "away_team": "Bayern Munich",
+        "time": "2025-10-18T20:00:00Z",
+        "status": "FT",
+        "score": { "home": 1, "away": 1 }
+      },
+      "integration_notes": "Detailed data structure. Convert fixtures to 'games' table in Supabase."
+    },
+    {
+      "name": "SoccerDataAPI",
+      "base_url": "https://api.soccerdataapi.com",
+      "free_tier": "75 requests/day (full coverage)",
+      "coverage": ["Premier League", "Ligue 1", "Serie A", "Arab leagues", "World Cup"],
+      "endpoints": {
+        "fixtures": "/fixtures",
+        "standings": "/standings",
+        "results": "/results",
+        "live": "/live"
+      },
+      "headers": {
+        "X-Auth-Token": "<YOUR_API_KEY>"
+      },
+      "response_mock": {
+        "league": "Saudi Pro League",
+        "home": "Al Hilal",
+        "away": "Al Nassr",
+        "score": { "home": 2, "away": 2 },
+        "minute": 88
+      },
+      "integration_notes": "Good for Arab leagues. Mock data can be reshaped for Supabase schema: 'match_id', 'league', 'home_team', 'away_team', 'score'."
+    },
+    {
+      "name": "ScoreBat Video API",
+      "base_url": "https://www.scorebat.com/video-api/v3/",
+      "free_tier": "Fully free for video highlights",
+      "coverage": ["Premier League", "Champions League", "World Cup", "La Liga", "Serie A"],
+      "endpoints": {
+        "videos": "/feed/?token=<YOUR_API_TOKEN>"
+      },
+      "headers": {},
+      "response_mock": {
+        "title": "Arsenal vs Chelsea Highlights",
+        "competition": "Premier League",
+        "matchviewUrl": "https://www.scorebat.com/arsenal-vs-chelsea-live-stream/",
+        "thumbnail": "https://www.scorebat.com/og/arsenal-vs-chelsea.jpg",
+        "videos": [{ "title": "Highlights", "embed": "<iframe ...></iframe>" }]
+      },
+      "integration_notes": "Use for embedded highlights or preview content in your news feed. No key needed for basic feed."
+    }
+  ]
+}
