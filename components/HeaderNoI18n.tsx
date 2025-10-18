@@ -24,11 +24,11 @@ export default function HeaderNoI18n() {
       {/* Top Bar */}
       <div className="bg-pl-purple text-pl-white py-2">
         <div className="w-full px-6 sm:px-6 lg:max-w-7xl lg:mx-auto lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center text-sm gap-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center text-xs gap-2">
             <div className="flex items-center gap-2 sm:gap-4">
-              <span className="font-semibold">{t('home.title')}</span>
+              <span className="font-medium">{t('home.title')}</span>
               <span className="text-pl-gold hidden sm:inline">|</span>
-              <span className="text-xs sm:text-sm">{t('home.description')}</span>
+              <span className="text-xs">{t('home.description')}</span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-xs">{t('common.lastUpdate')}: {t('common.liveUpdate')}</span>
@@ -47,7 +47,7 @@ export default function HeaderNoI18n() {
             className="flex items-center"
           >
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-pl-gold to-pl-accent bg-clip-text text-transparent">
+              <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-pl-gold to-pl-accent bg-clip-text text-transparent">
                 {t('home.title')}
               </h1>
               <p className="text-xs text-pl-light-gray hidden sm:block">{t('home.subtitle')}</p>
@@ -65,8 +65,8 @@ export default function HeaderNoI18n() {
                 transition={{ delay: index * 0.1 }}
                 className="pl-nav-link flex items-center gap-2 group"
               >
-                <item.icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                {item.name}
+                <item.icon className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                <span className="text-sm">{item.name}</span>
               </motion.a>
             ))}
           </nav>
@@ -85,7 +85,7 @@ export default function HeaderNoI18n() {
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className="p-2 rounded-lg bg-pl-gray/50 hover:bg-pl-gray/80 transition-colors"
             >
-              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Search className="w-4 h-4" />
             </motion.button>
 
             {/* Notifications */}
@@ -94,8 +94,8 @@ export default function HeaderNoI18n() {
               whileTap={{ scale: 0.95 }}
               className="relative p-2 rounded-lg bg-pl-gray/50 hover:bg-pl-gray/80 transition-colors"
             >
-              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-pl-red rounded-full"></span>
+              <Bell className="w-4 h-4" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-pl-red rounded-full"></span>
             </motion.button>
 
             {/* Profile */}
@@ -104,7 +104,7 @@ export default function HeaderNoI18n() {
               whileTap={{ scale: 0.95 }}
               className="p-2 rounded-lg bg-pl-gray/50 hover:bg-pl-gray/80 transition-colors"
             >
-              <User className="w-4 h-4 sm:w-5 sm:h-5" />
+              <User className="w-4 h-4" />
             </motion.button>
 
             {/* Mobile Menu Button */}
@@ -112,7 +112,7 @@ export default function HeaderNoI18n() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden p-2 rounded-lg bg-pl-gray/50 hover:bg-pl-gray/80 transition-colors"
             >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -129,10 +129,10 @@ export default function HeaderNoI18n() {
               <input
                 type="text"
                 placeholder={t('navigation.search')}
-                className="w-full bg-pl-gray/50 border border-pl-light-gray/30 rounded-lg px-4 py-3 pr-12 text-pl-white placeholder-pl-light-gray focus:outline-none focus:ring-2 focus:ring-pl-gold/50 focus:border-pl-gold"
+                className="w-full bg-pl-gray/50 border border-pl-light-gray/30 rounded-lg px-3 py-2 pr-10 text-sm text-pl-white placeholder-pl-light-gray focus:outline-none focus:ring-2 focus:ring-pl-gold/50 focus:border-pl-gold"
                 autoFocus
               />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-pl-light-gray" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-pl-light-gray" />
             </div>
           </motion.div>
         )}
@@ -159,8 +159,8 @@ export default function HeaderNoI18n() {
                       href={item.href}
                       className="pl-nav-link flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-pl-gray/50 transition-colors"
                     >
-                      <item.icon className="w-5 h-5" />
-                      {item.name}
+                      <item.icon className="w-4 h-4" />
+                      <span className="text-sm">{item.name}</span>
                     </a>
                   ))}
                 </div>

@@ -64,11 +64,11 @@ export default function ArticleCard({
   const getTitleSize = () => {
     switch (variant) {
       case 'compact':
-        return 'text-lg'
+        return 'text-sm'
       case 'featured':
-        return 'text-2xl md:text-3xl'
+        return 'text-lg md:text-xl'
       default:
-        return 'text-xl'
+        return 'text-sm'
     }
   }
 

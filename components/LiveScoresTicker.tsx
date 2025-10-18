@@ -199,7 +199,7 @@ export default function LiveScoresTicker() {
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-white" />
-              <span className="text-white font-semibold text-sm">
+              <span className="text-white font-semibold text-xs">
                 {t('liveTicker.noMatches')}
               </span>
             </div>
@@ -220,7 +220,7 @@ export default function LiveScoresTicker() {
         <div className="flex md:hidden items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Trophy className="w-4 h-4 text-white" />
-            <span className="text-white font-semibold text-sm whitespace-nowrap">
+            <span className="text-white font-semibold text-xs whitespace-nowrap">
               {t('sections.liveScores')}
             </span>
           </div>
@@ -234,16 +234,16 @@ export default function LiveScoresTicker() {
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/20 flex-1 justify-between mx-3"
             >
               <div className="flex items-center gap-2">
-                <span className="text-white text-sm font-medium whitespace-nowrap">
+                <span className="text-white text-xs font-medium whitespace-nowrap">
                   {liveMatches[currentMatchIndex].homeTeam}
                 </span>
-                <span className="text-white font-bold whitespace-nowrap">
+                <span className="text-white font-bold text-xs whitespace-nowrap">
                   {liveMatches[currentMatchIndex].status === 'live' || liveMatches[currentMatchIndex].status === 'finished' 
                     ? `${liveMatches[currentMatchIndex].homeScore}-${liveMatches[currentMatchIndex].awayScore}` 
                     : 'vs'
                   }
                 </span>
-                <span className="text-white text-sm font-medium whitespace-nowrap">
+                <span className="text-white text-xs font-medium whitespace-nowrap">
                   {liveMatches[currentMatchIndex].awayTeam}
                 </span>
               </div>
@@ -259,7 +259,7 @@ export default function LiveScoresTicker() {
         <div className="hidden md:flex lg:hidden items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Trophy className="w-4 h-4 text-white" />
-            <span className="text-white font-semibold text-sm whitespace-nowrap">
+            <span className="text-white font-semibold text-xs whitespace-nowrap">
               {t('sections.liveScores')}
             </span>
           </div>
@@ -331,7 +331,7 @@ export default function LiveScoresTicker() {
         <div className="hidden lg:flex items-center gap-6">
           <div className="flex items-center gap-2 flex-shrink-0">
             <Trophy className="w-4 h-4 text-white" />
-            <span className="text-white font-semibold text-sm whitespace-nowrap">
+            <span className="text-white font-semibold text-xs whitespace-nowrap">
               {t('sections.liveScores')}
             </span>
           </div>
@@ -363,14 +363,14 @@ export default function LiveScoresTicker() {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-white text-sm font-medium whitespace-nowrap">{match.homeTeam}</span>
-                  <span className="text-white font-bold whitespace-nowrap">
-                    {match.status === 'live' || match.status === 'finished' 
-                      ? `${match.homeScore}-${match.awayScore}` 
-                      : 'vs'
-                    }
-                  </span>
-                  <span className="text-white text-sm font-medium whitespace-nowrap">{match.awayTeam}</span>
+                    <span className="text-white text-xs font-medium whitespace-nowrap">{match.homeTeam}</span>
+                    <span className="text-white font-bold text-xs whitespace-nowrap">
+                      {match.status === 'live' || match.status === 'finished' 
+                        ? `${match.homeScore}-${match.awayScore}` 
+                        : 'vs'
+                      }
+                    </span>
+                    <span className="text-white text-xs font-medium whitespace-nowrap">{match.awayTeam}</span>
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -397,7 +397,7 @@ export default function LiveScoresTicker() {
             <ChevronRight className="w-4 h-4 text-white" />
           </button>
           
-          <button className="flex-shrink-0 text-white hover:text-purple-200 transition-colors flex items-center gap-1 text-sm px-2 py-1">
+          <button className="flex-shrink-0 text-white hover:text-purple-200 transition-colors flex items-center gap-1 text-xs px-2 py-1">
             {t('common.viewAll')} <ExternalLink className="w-3 h-3" />
           </button>
         </div>

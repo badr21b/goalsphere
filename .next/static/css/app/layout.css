@@ -1151,6 +1151,9 @@ video {
 .overflow-x-auto {
   overflow-x: auto;
 }
+.overflow-y-hidden {
+  overflow-y: hidden;
+}
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1671,6 +1674,9 @@ video {
 .pt-4 {
   padding-top: 1rem;
 }
+.pr-10 {
+  padding-right: 2.5rem;
+}
 .text-left {
   text-align: left;
 }
@@ -1868,6 +1874,9 @@ video {
 .text-yellow-500 {
   --tw-text-opacity: 1;
   color: rgb(234 179 8 / var(--tw-text-opacity, 1));
+}
+.text-white\/60 {
+  color: rgb(255 255 255 / 0.6);
 }
 .antialiased {
   -webkit-font-smoothing: antialiased;

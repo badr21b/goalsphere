@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslations } from '@/hooks/useTranslations'
-import { Calendar, Clock, Trophy, TrendingUp, ExternalLink } from 'lucide-react'
+import { Calendar, Clock, Trophy, TrendingUp, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react'
 
 interface Match {
   id: string
@@ -32,6 +32,8 @@ interface ThreeColumnLayoutProps {
 
 export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayoutProps) {
   const t = useTranslations()
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0)
+  const newsContainerRef = useRef<HTMLDivElement>(null)
 
   // Mock data for news items
   const newsItems: NewsItem[] = [
@@ -147,6 +149,25 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
     }
   }
 
+  // Auto-rotate news items every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentNewsIndex((prevIndex) => (prevIndex + 1) % newsItems.length)
+    }, 4000)
+
+    return () => clearInterval(interval)
+  }, [newsItems.length])
+
+  const scrollNewsUp = () => {
+    setCurrentNewsIndex((prevIndex) => 
+      prevIndex === 0 ? newsItems.length - 1 : prevIndex - 1
+    )
+  }
+
+  const scrollNewsDown = () => {
+    setCurrentNewsIndex((prevIndex) => (prevIndex + 1) % newsItems.length)
+  }
+
   return (
     <div className="w-full">
       {/* Mobile Layout - Stacked */}
@@ -165,10 +186,10 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500 mx-auto mb-3 sm:mb-4" />
-                <h2 className="text-lg sm:text-xl md:text-3xl font-bold text-white mb-2">
+                <h2 className="text-base sm:text-lg md:text-xl font-bold text-white mb-2">
                   {selectedCategory ? t(`categories.${selectedCategory}`) : 'Premier League'}
                 </h2>
-                <p className="text-xs sm:text-sm md:text-base text-gray-300">
+                <p className="text-xs sm:text-sm text-gray-300">
                   {selectedCategory ? 'Latest updates and news' : 'The most competitive league in the world'}
                 </p>
               </div>
@@ -177,16 +198,16 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
             {/* Live indicator */}
             <div className="absolute bottom-4 left-4 flex items-center gap-2">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <span className="text-white text-sm font-medium">{t('common.live')}</span>
+              <span className="text-white text-xs font-medium">{t('common.live')}</span>
             </div>
           </div>
 
           {/* Hero Content */}
           <div className="p-3 sm:p-4 md:p-6">
-            <h3 className="text-sm sm:text-lg md:text-xl font-bold text-white mb-2 hover:text-yellow-400 transition-colors cursor-pointer">
+            <h3 className="text-sm font-bold text-white mb-2 hover:text-yellow-400 transition-colors cursor-pointer">
               Forest v Chelsea: Caicedo and Wood benched, Enzo misses out
             </h3>
-            <p className="text-gray-400 text-xs sm:text-sm">
+            <p className="text-gray-400 text-xs">
               Latest team news and lineups for today's Premier League clash
             </p>
           </div>
@@ -199,7 +220,7 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
           transition={{ delay: 0.1 }}
           className="w-full bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700/20 p-3 sm:p-4"
         >
-          <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">{t('home.latestNews')}</h3>
+          <h3 className="text-sm font-bold text-white mb-3 sm:mb-4">{t('home.latestNews')}</h3>
           
           <div className="space-y-3 sm:space-y-4">
             {newsItems.slice(0, 3).map((item, index) => (
@@ -248,7 +269,7 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
           {/* Header */}
           <div className="p-3 border-b border-purple-700/20">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white">Premier League</h3>
+              <h3 className="text-sm font-bold text-white">Premier League</h3>
               <button className="text-xs text-purple-300 hover:text-white transition-colors flex items-center gap-1">
                 {t('navigation.viewAllMatches')} <ExternalLink className="w-3 h-3" />
               </button>
@@ -318,7 +339,7 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-xl overflow-hidden border border-purple-700/30 flex flex-col h-full max-h-96"
+            className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-xl overflow-hidden border border-purple-700/30 flex flex-col h-full max-h-96 overflow-y-hidden"
           >
             {/* Hero Image */}
             <div className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-800 to-gray-900">
@@ -328,10 +349,10 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-lg font-bold text-white mb-2">
                     {selectedCategory ? t(`categories.${selectedCategory}`) : 'Premier League'}
                   </h2>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-xs text-gray-300">
                     {selectedCategory ? 'Latest updates and news' : 'The most competitive league in the world'}
                   </p>
                 </div>
@@ -340,16 +361,16 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
               {/* Live indicator */}
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-white text-sm font-medium">{t('common.live')}</span>
+                <span className="text-white text-xs font-medium">{t('common.live')}</span>
               </div>
             </div>
 
             {/* Hero Content */}
             <div className="p-6 flex-1 flex flex-col justify-end">
-              <h3 className="text-xl font-bold text-white mb-2 hover:text-yellow-400 transition-colors cursor-pointer">
+              <h3 className="text-sm font-bold text-white mb-2 hover:text-yellow-400 transition-colors cursor-pointer">
                 Forest v Chelsea: Caicedo and Wood benched, Enzo misses out
               </h3>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs">
                 Latest team news and lineups for today's Premier League clash
               </p>
             </div>
@@ -362,44 +383,72 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700/20 p-4 flex flex-col h-full"
+            className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700/20 p-4 flex flex-col h-full max-h-96 overflow-y-hidden relative"
           >
-            <h3 className="text-lg font-bold text-white mb-4">{t('home.latestNews')}</h3>
-          
-            <div className="space-y-4 flex-1">
-              {newsItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + index * 0.1 }}
-                  className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 rounded-lg p-4 border border-purple-700/20 hover:border-purple-600/40 transition-all duration-300 cursor-pointer group"
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-white">{t('home.latestNews')}</h3>
+              
+              {/* Minimalistic arrows */}
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={scrollNewsUp}
+                  className="text-white/60 hover:text-white transition-colors duration-200 p-1"
                 >
-                  <div className="flex gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs bg-purple-600/30 text-purple-300 px-2 py-1 rounded-full">
-                          {item.category}
-                        </span>
-                        {item.isBreaking && (
-                          <span className="text-xs bg-red-600/30 text-red-300 px-2 py-1 rounded-full">
-                            {t('common.breaking')}
+                  <ChevronUp className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={scrollNewsDown}
+                  className="text-white/60 hover:text-white transition-colors duration-200 p-1"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          
+            <div className="flex-1 relative overflow-hidden">
+              <motion.div
+                ref={newsContainerRef}
+                key={currentNewsIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                {newsItems.slice(currentNewsIndex, currentNewsIndex + 3).map((item, index) => (
+                  <motion.div
+                    key={`${item.id}-${currentNewsIndex}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 rounded-lg p-4 border border-purple-700/20 hover:border-purple-600/40 transition-all duration-300 cursor-pointer group"
+                  >
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs bg-purple-600/30 text-purple-300 px-2 py-1 rounded-full">
+                            {item.category}
                           </span>
-                        )}
+                          {item.isBreaking && (
+                            <span className="text-xs bg-red-600/30 text-red-300 px-2 py-1 rounded-full">
+                              {t('common.breaking')}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-medium text-white group-hover:text-yellow-400 transition-colors line-clamp-2">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-gray-400 mt-1">{item.publishedAt}</p>
                       </div>
-                      <h4 className="text-sm font-medium text-white group-hover:text-yellow-400 transition-colors line-clamp-2">
-                        {item.title}
-                      </h4>
-                      <p className="text-xs text-gray-400 mt-1">{item.publishedAt}</p>
+                      
+                      {/* News thumbnail placeholder */}
+                      <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Trophy className="w-5 h-5 text-gray-400" />
+                      </div>
                     </div>
-                    
-                    {/* News thumbnail placeholder */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Trophy className="w-5 h-5 text-gray-400" />
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
+              </motion.div>
             </div>
           </motion.div>
         </div>
@@ -410,17 +459,17 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700/20 overflow-hidden flex flex-col h-full"
+            className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700/20 overflow-hidden flex flex-col h-full max-h-96 overflow-y-hidden"
           >
             {/* Header */}
             <div className="p-4 border-b border-purple-700/20">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-white">Premier League</h3>
-                <button className="text-sm text-purple-300 hover:text-white transition-colors flex items-center gap-1">
-                  {t('navigation.viewAllMatches')} <ExternalLink className="w-4 h-4" />
+                <h3 className="text-sm font-bold text-white">Premier League</h3>
+                <button className="text-xs text-purple-300 hover:text-white transition-colors flex items-center gap-1">
+                  {t('navigation.viewAllMatches')} <ExternalLink className="w-3 h-3" />
                 </button>
               </div>
-              <p className="text-sm text-gray-400">{t('common.today')}</p>
+              <p className="text-xs text-gray-400">{t('common.today')}</p>
             </div>
 
             {/* Matches List */}
