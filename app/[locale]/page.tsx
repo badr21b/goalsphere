@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import HeaderNoI18n from '@/components/HeaderNoI18n'
 import AdUnitNoI18n from '@/components/AdUnitNoI18n'
+import DynamicHero from '@/components/DynamicHero'
 import { useTranslations } from '@/hooks/useTranslations'
 
 const categories = [
@@ -87,15 +88,12 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        {/* Hero Section */}
-        <section className="mb-8">
-          <div className="h-[400px] bg-sport-gray/30 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-4xl font-bold text-white mb-4">{t('home.welcome')}</h2>
-              <p className="text-gray-400 text-lg">{t('home.heroDescription')}</p>
-            </div>
-          </div>
-        </section>
+        {/* Dynamic Hero Section */}
+        <DynamicHero 
+          selectedCategory={selectedCategory}
+          autoRotate={true}
+          rotationInterval={8000}
+        />
 
         {/* Category Filter */}
         <section className="mb-6">

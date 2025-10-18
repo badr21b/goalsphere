@@ -42,6 +42,16 @@
     "serie-a": "الدوري الإيطالي",
     "bundesliga": "الدوري الألماني"
   },
+  "hero": {
+    "stats": {
+      "teams": "الفرق",
+      "matches": "المباريات",
+      "seasons": "المواسم",
+      "trophies": "الألقاب",
+      "leagues": "البطولات",
+      "news": "الأخبار"
+    }
+  },
   "home": {
     "title": "GoalSphere",
     "subtitle": "أخبار كرة القدم باللغة العربية",

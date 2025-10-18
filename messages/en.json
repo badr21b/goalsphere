@@ -42,6 +42,16 @@
     "serie-a": "Serie A",
     "bundesliga": "Bundesliga"
   },
+  "hero": {
+    "stats": {
+      "teams": "Teams",
+      "matches": "Matches",
+      "seasons": "Seasons",
+      "trophies": "Trophies",
+      "leagues": "Leagues",
+      "news": "News"
+    }
+  },
   "home": {
     "title": "GoalSphere",
     "subtitle": "Football news in English",

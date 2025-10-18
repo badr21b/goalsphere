@@ -7,19 +7,16 @@
  * or disable the default devtool with "devtool: false".
  * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
  */
-exports.id = "_rsc_messages_fr_json";
-exports.ids = ["_rsc_messages_fr_json"];
-exports.modules = {
+self["webpackHotUpdate_N_E"]("app/[locale]/page",{
 
-/***/ "(rsc)/./messages/fr.json":
+/***/ "(app-pages-browser)/./messages/fr.json":
 /*!**************************!*\
   !*** ./messages/fr.json ***!
   \**************************/
-/***/ ((module) => {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 module.exports = JSON.parse('{"common":{"loading":"Chargement...","error":"Erreur","readMore":"Lire la suite","advertisement":"Publicité","clickHere":"Cliquez ici","views":"vues","hoursAgo":"il y a {count} heures","minutesAgo":"il y a {count} minutes","lastUpdate":"Dernière mise à jour","noMatches":"Aucun match actuellement","home":"Domicile","away":"Extérieur","live":"En direct","finished":"Terminé","upcoming":"À venir","breaking":"Urgent","allCategories":"Toutes les catégories"},"navigation":{"home":"Accueil","matches":"Matchs","standings":"Classements","news":"Actualités","transfers":"Transferts","search":"Rechercher dans les actualités et matchs...","notifications":"Notifications","profile":"Profil","previousArticle":"Article précédent","nextArticle":"Article suivant","goToSlide":"Aller à la diapositive"},"categories":{"transfers":"Transferts","analysis":"Analyse","breaking":"Actualités urgentes","premier-league":"Premier League","champions-league":"Ligue des Champions","saudi-pro-league":"Ligue Pro Saoudienne","la-liga":"La Liga","serie-a":"Serie A","bundesliga":"Bundesliga"},"hero":{"stats":{"teams":"Équipes","matches":"Matchs","seasons":"Saisons","trophies":"Trophées","leagues":"Ligues","news":"Actualités"}},"home":{"title":"GoalSphere","subtitle":"Actualités football en français","description":"La source principale d\'actualités et statistiques sportives","welcome":"Bienvenue sur GoalSphere","heroDescription":"La source principale d\'actualités et statistiques sportives","latestNews":"Dernières actualités","articleTitle":"Article {number} - Actualités sportives importantes","articleContent":"Ceci est un contenu d\'article d\'exemple. Vous pouvez lire plus de détails ici...","imagePlaceholder":"Image de l\'article {number}","adContent":{"header":"Regardez tous les matchs de Premier League et de Ligue Pro Saoudienne sur notre chaîne sportive","footer":"Obtenez les dernières actualités football et résultats en direct","inContent":"Suivez tous les matchs de Ligue Pro Saoudienne et compétitions européennes"}},"footer":{"title":"GoalSphere","description":"La source principale d\'actualités et statistiques sportives dans le monde arabe","privacyPolicy":"Politique de confidentialité","termsOfService":"Conditions d\'utilisation","contactUs":"Nous contacter"},"liveTicker":{"title":"Actualités en direct","noMatches":"Aucun match actuellement"},"adUnit":{"closeAd":"Fermer la publicité","adSpace":"Espace publicitaire - cliquez pour interagir"}}');
 
 /***/ })
 
-};
-;
+});
