@@ -6,6 +6,8 @@ import HeaderNoI18n from '@/components/HeaderNoI18n'
 import { useTranslations } from '@/hooks/useTranslations'
 import { FootballApiConfig, ApiResponse, NormalizedMatch, ApiTestResult, FootballApi, DataSchema } from '@/lib/types/api'
 import { testFootballApis } from '@/lib/services/apiTestService'
+import { geminiFootballDataService, GeminiFootballData } from '@/lib/services/geminiFootballDataService'
+import { apiFootballService } from '@/lib/services/apiFootballService'
 
 export default function ApiTestPage() {
   const t = useTranslations()
@@ -14,6 +16,12 @@ export default function ApiTestPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedApi, setSelectedApi] = useState<string | null>(null)
   const [normalizedData, setNormalizedData] = useState<NormalizedMatch[]>([])
+  const [geminiData, setGeminiData] = useState<GeminiFootballData | null>(null)
+  const [geminiLoading, setGeminiLoading] = useState(false)
+  const [geminiTestResult, setGeminiTestResult] = useState<any>(null)
+  const [geminiTestLoading, setGeminiTestLoading] = useState(false)
+  const [apiFootballData, setApiFootballData] = useState<any>(null)
+  const [apiFootballLoading, setApiFootballLoading] = useState(false)
 
   // Load API configuration
   useEffect(() => {
@@ -100,6 +108,48 @@ export default function ApiTestPage() {
     }
   }
 
+  const testGeminiAPI = async () => {
+    setGeminiLoading(true)
+    try {
+      const data = await geminiFootballDataService.getAllData()
+      setGeminiData(data)
+    } catch (error) {
+      console.error('Failed to test Gemini API:', error)
+    } finally {
+      setGeminiLoading(false)
+    }
+  }
+
+  const testGeminiApiKey = async () => {
+    setGeminiTestLoading(true)
+    try {
+      const response = await fetch('/api/gemini/test')
+      const result = await response.json()
+      setGeminiTestResult(result)
+    } catch (error) {
+      console.error('Failed to test Gemini API key:', error)
+      setGeminiTestResult({
+        success: false,
+        error: 'Failed to test API key',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      })
+    } finally {
+      setGeminiTestLoading(false)
+    }
+  }
+
+  const testApiFootball = async () => {
+    setApiFootballLoading(true)
+    try {
+      const data = await apiFootballService.getAllData()
+      setApiFootballData(data)
+    } catch (error) {
+      console.error('Failed to test API-Football:', error)
+    } finally {
+      setApiFootballLoading(false)
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'success': return 'text-green-400'
@@ -138,6 +188,30 @@ export default function ApiTestPage() {
               className="px-6 py-3 bg-sport-red text-white rounded-lg font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Testing APIs...' : 'Test All APIs'}
+            </button>
+
+            <button
+              onClick={testGeminiAPI}
+              disabled={geminiLoading}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {geminiLoading ? 'Testing Gemini AI...' : 'Test Gemini AI + TheSportsDB'}
+            </button>
+
+            <button
+              onClick={testGeminiApiKey}
+              disabled={geminiTestLoading}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {geminiTestLoading ? 'Testing API Key...' : 'Test Gemini API Key'}
+            </button>
+
+            <button
+              onClick={testApiFootball}
+              disabled={apiFootballLoading}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {apiFootballLoading ? 'Testing API-Football...' : 'Test API-Football + Gemini'}
             </button>
             
             {apiConfig && (
@@ -211,6 +285,252 @@ export default function ApiTestPage() {
                   )}
                 </div>
               ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Gemini API Key Test Results */}
+        {geminiTestResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h2 className="text-2xl font-bold text-white mb-4">🔑 Gemini API Key Test</h2>
+            <div className={`rounded-lg p-6 border ${
+              geminiTestResult.success && geminiTestResult.data?.isValid 
+                ? 'bg-green-900/30 border-green-700/50' 
+                : 'bg-red-900/30 border-red-700/50'
+            }`}>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">
+                  {geminiTestResult.success && geminiTestResult.data?.isValid ? '✅' : '❌'}
+                </span>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {geminiTestResult.success && geminiTestResult.data?.isValid 
+                      ? 'API Key Valid' 
+                      : 'API Key Invalid'}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {geminiTestResult.success && geminiTestResult.data?.isValid 
+                      ? 'Gemini API is working correctly' 
+                      : geminiTestResult.data?.error || 'Unknown error'}
+                  </p>
+                </div>
+              </div>
+              
+              {geminiTestResult.data && (
+                <div className="bg-gray-800/50 rounded p-4">
+                  <h4 className="font-semibold text-white mb-2">Test Details:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-400">Status:</span>
+                      <span className={`ml-2 ${geminiTestResult.data.isValid ? 'text-green-400' : 'text-red-400'}`}>
+                        {geminiTestResult.data.isValid ? 'Valid' : 'Invalid'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Model:</span>
+                      <span className="ml-2 text-white">{geminiTestResult.data.model || 'N/A'}</span>
+                    </div>
+                    {geminiTestResult.data.error && (
+                      <div className="md:col-span-2">
+                        <span className="text-gray-400">Error:</span>
+                        <span className="ml-2 text-red-400">{geminiTestResult.data.error}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* API-Football Results */}
+        {apiFootballData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h2 className="text-2xl font-bold text-white mb-4">⚽ API-Football + Gemini AI Results</h2>
+            <div className="bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg p-6 border border-green-700/50">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-400">{apiFootballData.liveMatches.length}</div>
+                  <div className="text-sm text-gray-400">Live Matches</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-400">{apiFootballData.todaysMatches.length}</div>
+                  <div className="text-sm text-gray-400">Today's Fixtures</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-400">{apiFootballData.standings.length}</div>
+                  <div className="text-sm text-gray-400">Standings Entries</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-yellow-400">{apiFootballData.news.length}</div>
+                  <div className="text-sm text-gray-400">AI News Articles</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Live Matches */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3">Live Matches</h3>
+                  {apiFootballData.liveMatches.length > 0 ? (
+                    <div className="space-y-2">
+                      {apiFootballData.liveMatches.slice(0, 3).map((match: any) => (
+                        <div key={match.fixture.id} className="bg-gray-700/50 rounded p-3">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium">{match.teams.home.name} vs {match.teams.away.name}</div>
+                              <div className="text-sm text-gray-400">{match.league.name}</div>
+                              <div className="text-sm text-gray-500">{match.fixture.venue.name}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-green-400">
+                                {match.goals.home || 0} - {match.goals.away || 0}
+                              </div>
+                              <div className="text-sm text-green-300">{match.fixture.status.long}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No live matches currently</p>
+                  )}
+                </div>
+
+                {/* Today's Matches */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3">Today's Fixtures</h3>
+                  {apiFootballData.todaysMatches.length > 0 ? (
+                    <div className="space-y-2">
+                      {apiFootballData.todaysMatches.slice(0, 3).map((match: any) => (
+                        <div key={match.fixture.id} className="bg-gray-700/50 rounded p-3">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium">{match.teams.home.name} vs {match.teams.away.name}</div>
+                              <div className="text-sm text-gray-400">{match.league.name}</div>
+                              <div className="text-sm text-gray-500">{match.fixture.venue.name}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm text-gray-300">
+                                {new Date(match.fixture.date).toLocaleTimeString()}
+                              </div>
+                              <div className="text-sm text-blue-300">{match.fixture.status.long}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No matches scheduled for today</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-gray-800/50 rounded">
+                <p className="text-sm text-gray-300">
+                  <strong>Real Data Source:</strong> API-Football provides live, accurate football data from major leagues worldwide. 
+                  Combined with Gemini AI for intelligent content generation and analysis.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Gemini AI Results */}
+        {geminiData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h2 className="text-2xl font-bold text-white mb-4">🤖 Gemini AI + TheSportsDB Results</h2>
+            <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg p-6 border border-purple-700/50">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-400">{geminiData.liveMatches.length}</div>
+                  <div className="text-sm text-gray-400">Live Matches</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-400">{geminiData.todaysMatches.length}</div>
+                  <div className="text-sm text-gray-400">Today's Fixtures</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-400">{geminiData.news.length}</div>
+                  <div className="text-sm text-gray-400">AI News Articles</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-yellow-400">{geminiData.standings.length}</div>
+                  <div className="text-sm text-gray-400">Standings Entries</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Live Matches */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3">Live Matches</h3>
+                  {geminiData.liveMatches.length > 0 ? (
+                    <div className="space-y-2">
+                      {geminiData.liveMatches.slice(0, 3).map((match) => (
+                        <div key={match.match_id} className="bg-gray-700/50 rounded p-3">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium">{match.home_team} vs {match.away_team}</div>
+                              <div className="text-sm text-gray-400">{match.league}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-green-400">
+                                {match.score ? `${match.score.home} - ${match.score.away}` : 'TBD'}
+                              </div>
+                              <div className="text-sm text-green-300">{match.status}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No live matches currently</p>
+                  )}
+                </div>
+
+                {/* AI News */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3">AI-Generated News</h3>
+                  {geminiData.news.length > 0 ? (
+                    <div className="space-y-2">
+                      {geminiData.news.slice(0, 3).map((article, index) => (
+                        <div key={index} className="bg-gray-700/50 rounded p-3">
+                          <div className="font-medium text-sm mb-1">{article.title}</div>
+                          <div className="text-xs text-gray-400 mb-2">{article.summary}</div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs bg-purple-600 text-purple-100 px-2 py-1 rounded">
+                              {article.category}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(article.publishedAt).toLocaleTimeString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No news generated</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-gray-800/50 rounded">
+                <p className="text-sm text-gray-300">
+                  <strong>AI Processing:</strong> Data fetched from TheSportsDB API and enhanced with Gemini AI for 
+                  intelligent content generation, real-time analysis, and contextual news creation.
+                </p>
+              </div>
             </div>
           </motion.div>
         )}

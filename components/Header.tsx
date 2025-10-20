@@ -12,8 +12,8 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   const navigationItems = [
-    { name: t('navigation.home'), href: '#', icon: Trophy },
-    { name: t('navigation.matches'), href: '#', icon: Calendar },
+    { name: t('navigation.home'), href: '/', icon: Trophy },
+    { name: 'Premier League', href: '/premier-league', icon: Calendar },
     { name: t('navigation.standings'), href: '#', icon: BarChart3 },
     { name: t('navigation.news'), href: '#', icon: Bell },
     { name: t('navigation.transfers'), href: '#', icon: User },

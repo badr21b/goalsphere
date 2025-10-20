@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslations } from '@/hooks/useTranslations'
-import { Calendar, Clock, Trophy, TrendingUp, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react'
+import { Calendar, Clock, Trophy, TrendingUp, ExternalLink, ChevronUp, ChevronDown, MapPin } from 'lucide-react'
 
 interface Match {
   id: string
@@ -15,6 +15,10 @@ interface Match {
   league: string
   status: 'live' | 'upcoming' | 'finished'
   broadcasters: string[]
+  homeScore?: number | null
+  awayScore?: number | null
+  venue?: string
+  date?: string
 }
 
 interface NewsItem {
@@ -33,7 +37,10 @@ interface ThreeColumnLayoutProps {
 export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayoutProps) {
   const t = useTranslations()
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0)
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
   const newsContainerRef = useRef<HTMLDivElement>(null)
+  const [realMatches, setRealMatches] = useState<Match[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Mock data for news items
   const newsItems: NewsItem[] = [
@@ -75,53 +82,97 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
     }
   ]
 
-  // Mock data for today's matches
-  const todayMatches: Match[] = [
-    {
-      id: '1',
-      homeTeam: 'Nott\'m Forest',
-      awayTeam: 'Chelsea',
-      homeLogo: '/images/teams/forest.png',
-      awayLogo: '/images/teams/chelsea.png',
-      time: '14:30',
-      league: 'Premier League',
-      status: 'live',
-      broadcasters: ['Sky Sports', 'BT Sport']
-    },
-    {
-      id: '2',
-      homeTeam: 'Brighton',
-      awayTeam: 'Newcastle',
-      homeLogo: '/images/teams/brighton.png',
-      awayLogo: '/images/teams/newcastle.png',
-      time: '17:00',
-      league: 'Premier League',
-      status: 'upcoming',
-      broadcasters: ['Sky Sports']
-    },
-    {
-      id: '3',
-      homeTeam: 'Burnley',
-      awayTeam: 'Leeds',
-      homeLogo: '/images/teams/burnley.png',
-      awayLogo: '/images/teams/leeds.png',
-      time: '17:00',
-      league: 'Premier League',
-      status: 'upcoming',
-      broadcasters: ['BT Sport']
-    },
-    {
-      id: '4',
-      homeTeam: 'Crystal Palace',
-      awayTeam: 'Bournemouth',
-      homeLogo: '/images/teams/palace.png',
-      awayLogo: '/images/teams/bournemouth.png',
-      time: '17:00',
-      league: 'Premier League',
-      status: 'upcoming',
-      broadcasters: ['Sky Sports']
+  // Fetch real Premier League data
+  useEffect(() => {
+    const fetchPremierLeagueData = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/football/premier-league')
+        if (!response.ok) {
+          throw new Error('Failed to fetch Premier League data')
+        }
+        
+        const data = await response.json()
+        
+        // Convert API data to our Match interface
+        const convertedMatches: Match[] = [
+          ...(data.data.todaysMatches || []).map((match: any) => ({
+            id: match.fixture.id.toString(),
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            homeLogo: match.teams.home.logo,
+            awayLogo: match.teams.away.logo,
+            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }),
+            league: match.league.name,
+            status: match.fixture.status.short === 'LIVE' ? 'live' : 
+                   match.fixture.status.short === 'FT' ? 'finished' : 'upcoming',
+            broadcasters: ['Sky Sports', 'BT Sport'],
+            homeScore: match.goals.home,
+            awayScore: match.goals.away,
+            venue: match.fixture.venue.name,
+            date: match.fixture.date
+          })),
+          ...(data.data.thisWeekMatches || []).slice(0, 3).map((match: any) => ({
+            id: match.fixture.id.toString(),
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            homeLogo: match.teams.home.logo,
+            awayLogo: match.teams.away.logo,
+            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }),
+            league: match.league.name,
+            status: match.fixture.status.short === 'LIVE' ? 'live' : 
+                   match.fixture.status.short === 'FT' ? 'finished' : 'upcoming',
+            broadcasters: ['Sky Sports', 'BT Sport'],
+            homeScore: match.goals.home,
+            awayScore: match.goals.away,
+            venue: match.fixture.venue.name,
+            date: match.fixture.date
+          })),
+          ...(data.data.previousWeekMatches || []).map((match: any) => ({
+            id: match.fixture.id.toString(),
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            homeLogo: match.teams.home.logo,
+            awayLogo: match.teams.away.logo,
+            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }),
+            league: match.league.name,
+            status: match.fixture.status.short === 'LIVE' ? 'live' : 
+                   match.fixture.status.short === 'FT' ? 'finished' : 'upcoming',
+            broadcasters: ['Sky Sports', 'BT Sport'],
+            homeScore: match.goals.home,
+            awayScore: match.goals.away,
+            venue: match.fixture.venue.name,
+            date: match.fixture.date
+          }))
+        ]
+        
+        setRealMatches(convertedMatches)
+      } catch (error) {
+        console.error('Error fetching Premier League data:', error)
+        // Fallback to empty array on error
+        setRealMatches([])
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    fetchPremierLeagueData()
+  }, [])
+
+  // Use real matches or fallback to empty array
+  const todayMatches = realMatches.slice(0, 4)
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -167,6 +218,36 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
   const scrollNewsDown = () => {
     setCurrentNewsIndex((prevIndex) => (prevIndex + 1) % newsItems.length)
   }
+
+  // Group matches by time period and remove duplicates
+  const getMatchTimePeriod = (date: string) => {
+    const matchDate = new Date(date)
+    const now = new Date()
+    const diffTime = now.getTime() - matchDate.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays <= 7) return 'This Week'
+    if (diffDays <= 14) return 'Last Week'
+    if (diffDays <= 21) return '2 Weeks Ago'
+    if (diffDays <= 30) return '3 Weeks Ago'
+    return 'Last Month'
+  }
+
+  // Remove duplicate matches based on fixture ID
+  const uniqueMatches = realMatches.filter((match, index, self) => 
+    index === self.findIndex(m => m.id === match.id)
+  )
+
+  const groupedMatches = uniqueMatches.reduce((acc, match) => {
+    const timePeriod = getMatchTimePeriod(match.date || '')
+    if (!acc[timePeriod]) {
+      acc[timePeriod] = []
+    }
+    acc[timePeriod].push(match)
+    return acc
+  }, {} as Record<string, Match[]>)
 
   return (
     <div className="w-full">
@@ -264,66 +345,130 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="w-full bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700/20 overflow-hidden"
+          className="w-full bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-md rounded-xl border border-purple-700/30 overflow-hidden shadow-2xl"
         >
           {/* Header */}
-          <div className="p-3 border-b border-purple-700/20">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-bold text-white">Premier League</h3>
-              <button className="text-xs text-purple-300 hover:text-white transition-colors flex items-center gap-1">
-                {t('navigation.viewAllMatches')} <ExternalLink className="w-3 h-3" />
-              </button>
+          <div className="p-2 border-b border-purple-700/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-purple-400" />
+                <h3 className="text-sm font-bold text-white">Premier League</h3>
+              </div>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => {/* TODO: Implement scroll up */}}
+                  className="text-purple-300 hover:text-white transition-colors duration-200 p-1"
+                >
+                  <ChevronUp className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => {/* TODO: Implement scroll down */}}
+                  className="text-purple-300 hover:text-white transition-colors duration-200 p-1"
+                >
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              </div>
             </div>
-            <p className="text-xs text-gray-400">{t('common.today')}</p>
           </div>
 
-          {/* Matches List */}
-          <div className="p-3 space-y-3">
-            {todayMatches.slice(0, 4).map((match, index) => (
-              <motion.div
-                key={match.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className="border-b border-purple-700/10 pb-3 last:border-b-0"
-              >
-                <div className="space-y-2">
-                  {/* Teams */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-gray-700 rounded-full flex items-center justify-center">
-                        <Trophy className="w-2 h-2 text-gray-400" />
-                      </div>
-                      <span className="text-xs text-white font-medium">{match.homeTeam}</span>
+            {/* Matches List */}
+            <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+              {loading ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                  <p className="text-xs text-gray-400">Loading matches...</p>
+                </div>
+              ) : Object.keys(groupedMatches).length === 0 ? (
+                <div className="text-center py-4">
+                  <Trophy className="w-10 h-10 text-gray-500 mx-auto mb-2" />
+                  <p className="text-xs text-gray-400">No matches available</p>
+                </div>
+              ) : (
+                Object.entries(groupedMatches).map(([timePeriod, matches]) => (
+                  <div key={timePeriod} className="space-y-1">
+                    {/* Time Period Header */}
+                    <div className="px-2 py-1">
+                      <h4 className="text-xs font-bold text-purple-300 uppercase tracking-wide">
+                        {timePeriod}
+                      </h4>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-white font-medium">{match.awayTeam}</span>
-                      <div className="w-4 h-4 bg-gray-700 rounded-full flex items-center justify-center">
-                        <Trophy className="w-2 h-2 text-gray-400" />
-                      </div>
+                    {/* Matches for this period */}
+                    <div className="space-y-0">
+                      {matches.map((match, index) => (
+                        <motion.div
+                          key={`${match.id}-${timePeriod}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="px-4 py-4 hover:bg-purple-800/30 transition-colors duration-200 border-b border-purple-700/30 last:border-b-0 rounded-lg mx-2"
+                        >
+                          <div className="flex items-center justify-center">
+                            {/* Home Team */}
+                            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                              <div className="w-10 h-10 rounded-full shadow-lg  p-1 bg-white/10">
+                                <img 
+                                  src={match.homeLogo} 
+                                  alt={match.homeTeam}
+                                  className="w-full h-full rounded-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs text-white font-medium truncate text-center">
+                                {match.homeTeam}
+                              </span>
+                            </div>
+                            
+                            {/* Score - Centered */}
+                            <div className="flex flex-col items-center mx-2 min-w-0">
+                              <div className="text-sm font-bold text-white">
+                                {match.homeScore !== null && match.awayScore !== null 
+                                  ? `${match.homeScore} - ${match.awayScore}`
+                                  : 'vs'
+                                }
+                              </div>
+                              <div className={`text-xs px-1 py-0.5 rounded text-center ${
+                                match.status === 'finished' 
+                                  ? 'bg-green-600/30 text-green-300' 
+                                  : match.status === 'live'
+                                  ? 'bg-red-600/30 text-red-300'
+                                  : 'bg-gray-600/30 text-gray-300'
+                              }`}>
+                                {match.status === 'finished' ? 'FT' : 
+                                 match.status === 'live' ? 'LIVE' : 
+                                 match.time}
+                              </div>
+                            </div>
+                            
+                            {/* Away Team */}
+                            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                              <div className="w-10 h-10 rounded-full shadow-lg  p-1 bg-white/10">
+                                <img 
+                                  src={match.awayLogo} 
+                                  alt={match.awayTeam}
+                                  className="w-full h-full rounded-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs text-white font-medium truncate text-center">
+                                {match.awayTeam}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
-                  
-                  {/* Time and Status */}
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-gray-400">{match.time}</div>
-                    <div className={`text-xs font-medium ${getStatusColor(match.status)}`}>
-                      {getStatusText(match.status)}
-                    </div>
-                  </div>
-                </div>
-                
-                <button className="w-full bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1 mt-2">
-                  <Clock className="w-3 h-3" />
-                  Multiple Broadcasters
-                </button>
-              </motion.div>
-            ))}
-          </div>
+                ))
+              )}
+            </div>
 
           {/* View All Matches Button */}
-          <div className="p-3 border-t border-purple-700/20">
+          <div className="p-4 border-t border-purple-700/30">
             <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2">
               <TrendingUp className="w-3 h-3" />
               {t('navigation.viewAllMatches')}
@@ -335,7 +480,7 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
       {/* Desktop Layout - Three Columns */}
       <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
         {/* Left Column - Biggest Info (Hero Section) */}
-        <div className="lg:col-span-6 flex flex-col h-full">
+        <div className="lg:col-span-5 flex flex-col h-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -454,71 +599,135 @@ export default function ThreeColumnLayout({ selectedCategory }: ThreeColumnLayou
         </div>
 
         {/* Right Column - Today's Matches */}
-        <div className="lg:col-span-3 flex flex-col h-full">
+        <div className="lg:col-span-4 flex flex-col h-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl border border-purple-700/20 overflow-hidden flex flex-col h-full max-h-96 overflow-y-hidden"
+            className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-md rounded-xl border border-purple-700/30 overflow-hidden flex flex-col h-full max-h-96 overflow-y-hidden shadow-2xl"
           >
             {/* Header */}
-            <div className="p-4 border-b border-purple-700/20">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-bold text-white">Premier League</h3>
-                <button className="text-xs text-purple-300 hover:text-white transition-colors flex items-center gap-1">
-                  {t('navigation.viewAllMatches')} <ExternalLink className="w-3 h-3" />
-                </button>
+            <div className="p-3 border-b border-purple-700/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-purple-400" />
+                  <h3 className="text-sm font-bold text-white">Premier League</h3>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => {/* TODO: Implement scroll up */}}
+                    className="text-purple-300 hover:text-white transition-colors duration-200 p-1"
+                  >
+                    <ChevronUp className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => {/* TODO: Implement scroll down */}}
+                    className="text-purple-300 hover:text-white transition-colors duration-200 p-1"
+                  >
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
-              <p className="text-xs text-gray-400">{t('common.today')}</p>
             </div>
 
             {/* Matches List */}
-            <div className="p-4 space-y-4 flex-1">
-              {todayMatches.map((match, index) => (
-                <motion.div
-                  key={match.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="border-b border-purple-700/10 pb-4 last:border-b-0"
-                >
-                  <div className="space-y-2">
-                    {/* Teams */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 bg-gray-700 rounded-full flex items-center justify-center">
-                          <Trophy className="w-3 h-3 text-gray-400" />
-                        </div>
-                        <span className="text-sm text-white font-medium">{match.homeTeam}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-white font-medium">{match.awayTeam}</span>
-                        <div className="w-5 h-5 bg-gray-700 rounded-full flex items-center justify-center">
-                          <Trophy className="w-3 h-3 text-gray-400" />
-                        </div>
-                      </div>
+            <div className="p-5 space-y-2 flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                  <p className="text-sm text-gray-400">Loading matches...</p>
+                </div>
+              ) : Object.keys(groupedMatches).length === 0 ? (
+                <div className="text-center py-8">
+                  <Trophy className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                  <p className="text-sm text-gray-400">No matches available</p>
+                </div>
+              ) : (
+                Object.entries(groupedMatches).map(([timePeriod, matches]) => (
+                  <div key={timePeriod} className="space-y-1">
+                    {/* Time Period Header */}
+                    <div className="px-2 py-2">
+                      <h4 className="text-sm font-bold text-purple-300 uppercase tracking-wide">
+                        {timePeriod}
+                      </h4>
                     </div>
                     
-                    {/* Time and Status */}
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-400">{match.time}</div>
-                      <div className={`text-sm font-medium ${getStatusColor(match.status)}`}>
-                        {getStatusText(match.status)}
-                      </div>
+                    {/* Matches for this period */}
+                    <div className="space-y-0">
+                      {matches.map((match, index) => (
+                        <motion.div
+                          key={`${match.id}-${timePeriod}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="px-4 py-5 hover:bg-purple-800/30 transition-colors duration-200 border-b border-purple-700/30 last:border-b-0 rounded-lg mx-2"
+                        >
+                          <div className="flex items-center justify-center">
+                            {/* Home Team */}
+                            <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+                              <div className="w-10 h-10 rounded-full shadow-lg  p-1 bg-white/10">
+                                <img 
+                                  src={match.homeLogo} 
+                                  alt={match.homeTeam}
+                                  className="w-full h-full rounded-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                                  }}
+                                />
+                              </div>
+                              <span className="text-sm text-white font-medium truncate text-center">
+                                {match.homeTeam}
+                              </span>
+                            </div>
+                            
+                            {/* Score - Centered */}
+                            <div className="flex flex-col items-center mx-4 min-w-0">
+                              <div className="text-lg font-bold text-white">
+                                {match.homeScore !== null && match.awayScore !== null 
+                                  ? `${match.homeScore} - ${match.awayScore}`
+                                  : 'vs'
+                                }
+                              </div>
+                              <div className={`text-xs px-2 py-1 rounded text-center ${
+                                match.status === 'finished' 
+                                  ? 'bg-green-600/30 text-green-300' 
+                                  : match.status === 'live'
+                                  ? 'bg-red-600/30 text-red-300'
+                                  : 'bg-gray-600/30 text-gray-300'
+                              }`}>
+                                {match.status === 'finished' ? 'FT' : 
+                                 match.status === 'live' ? 'LIVE' : 
+                                 match.time}
+                              </div>
+                            </div>
+                            
+                            {/* Away Team */}
+                            <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+                              <div className="w-10 h-10 rounded-full shadow-lg  p-1 bg-white/10">
+                                <img 
+                                  src={match.awayLogo} 
+                                  alt={match.awayTeam}
+                                  className="w-full h-full rounded-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                                  }}
+                                />
+                              </div>
+                              <span className="text-sm text-white font-medium truncate text-center">
+                                {match.awayTeam}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
-                  
-                  <button className="w-full bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-sm py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 mt-2">
-                    <Clock className="w-4 h-4" />
-                    Multiple Broadcasters
-                  </button>
-                </motion.div>
-              ))}
+                ))
+              )}
             </div>
 
             {/* View All Matches Button */}
-            <div className="p-4 border-t border-purple-700/20">
+            <div className="p-5 border-t border-purple-700/30">
               <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2">
                 <TrendingUp className="w-4 h-4" />
                 {t('navigation.viewAllMatches')}

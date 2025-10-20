@@ -6,17 +6,22 @@ import type { RootState } from '../index'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Only create Supabase client if we're in the browser or have valid config
+export const supabase = typeof window !== 'undefined' || supabaseUrl !== 'https://placeholder.supabase.co' 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 // Base query with Supabase integration
 export const baseQuery = fetchBaseQuery({
-  baseUrl: `${supabaseUrl}/rest/v1/`,
+  baseUrl: supabaseUrl !== 'https://placeholder.supabase.co' ? `${supabaseUrl}/rest/v1/` : '/api/',
   prepareHeaders: (headers, { getState }) => {
-    // Add Supabase headers
-    headers.set('apikey', supabaseAnonKey)
-    headers.set('Authorization', `Bearer ${supabaseAnonKey}`)
-    headers.set('Content-Type', 'application/json')
-    headers.set('Prefer', 'return=representation')
+    // Add Supabase headers only if we have valid config
+    if (supabaseUrl !== 'https://placeholder.supabase.co') {
+      headers.set('apikey', supabaseAnonKey)
+      headers.set('Authorization', `Bearer ${supabaseAnonKey}`)
+      headers.set('Content-Type', 'application/json')
+      headers.set('Prefer', 'return=representation')
+    }
     
     return headers
   },

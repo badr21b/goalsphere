@@ -9,8 +9,10 @@ interface Match {
   id: string
   homeTeam: string
   awayTeam: string
-  homeScore: number
-  awayScore: number
+  homeLogo: string
+  awayLogo: string
+  homeScore: number | null
+  awayScore: number | null
   status: 'live' | 'upcoming' | 'finished'
   league: string
   time: string
@@ -21,6 +23,8 @@ const mockMatches: Match[] = [
     id: '1',
     homeTeam: 'Crystal Palace',
     awayTeam: 'Bournemouth',
+    homeLogo: 'https://media.api-sports.io/football/teams/354.png',
+    awayLogo: 'https://media.api-sports.io/football/teams/35.png',
     homeScore: 1,
     awayScore: 0,
     status: 'live',
@@ -31,6 +35,8 @@ const mockMatches: Match[] = [
     id: '2',
     homeTeam: 'Brighton',
     awayTeam: 'Newcastle',
+    homeLogo: 'https://media.api-sports.io/football/teams/51.png',
+    awayLogo: 'https://media.api-sports.io/football/teams/34.png',
     homeScore: 0,
     awayScore: 0,
     status: 'upcoming',
@@ -41,6 +47,8 @@ const mockMatches: Match[] = [
     id: '3',
     homeTeam: 'Burnley',
     awayTeam: 'Leeds',
+    homeLogo: 'https://media.api-sports.io/football/teams/44.png',
+    awayLogo: 'https://media.api-sports.io/football/teams/63.png',
     homeScore: 2,
     awayScore: 1,
     status: 'finished',
@@ -51,6 +59,8 @@ const mockMatches: Match[] = [
     id: '4',
     homeTeam: 'Man City',
     awayTeam: 'Everton',
+    homeLogo: 'https://media.api-sports.io/football/teams/50.png',
+    awayLogo: 'https://media.api-sports.io/football/teams/45.png',
     homeScore: 0,
     awayScore: 0,
     status: 'upcoming',
@@ -61,6 +71,8 @@ const mockMatches: Match[] = [
     id: '5',
     homeTeam: 'Sunderland',
     awayTeam: 'Wolves',
+    homeLogo: 'https://media.api-sports.io/football/teams/71.png',
+    awayLogo: 'https://media.api-sports.io/football/teams/39.png',
     homeScore: 0,
     awayScore: 0,
     status: 'upcoming',
@@ -71,6 +83,8 @@ const mockMatches: Match[] = [
     id: '6',
     homeTeam: 'Fulham',
     awayTeam: 'Arsenal',
+    homeLogo: 'https://media.api-sports.io/football/teams/36.png',
+    awayLogo: 'https://media.api-sports.io/football/teams/42.png',
     homeScore: 0,
     awayScore: 0,
     status: 'upcoming',
@@ -82,14 +96,113 @@ const mockMatches: Match[] = [
 export default function LiveScoresTicker() {
   const t = useTranslations()
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
-  const [liveMatches, setLiveMatches] = useState<Match[]>(mockMatches)
+  const [liveMatches, setLiveMatches] = useState<Match[]>([])
+  const [loading, setLoading] = useState(true)
   const [scrollPosition, setScrollPosition] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Fetch real Premier League data
+  useEffect(() => {
+    const fetchPremierLeagueData = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/football/premier-league')
+        if (!response.ok) {
+          throw new Error('Failed to fetch Premier League data')
+        }
+        
+        const data = await response.json()
+        
+        // Convert API data to our Match interface
+        const convertedMatches: Match[] = [
+          ...(data.data.liveMatches || []).map((match: any) => ({
+            id: match.fixture.id.toString(),
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            homeLogo: match.teams.home.logo,
+            awayLogo: match.teams.away.logo,
+            homeScore: match.goals.home,
+            awayScore: match.goals.away,
+            status: 'live' as const,
+            league: match.league.name,
+            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            })
+          })),
+          ...(data.data.todaysMatches || []).map((match: any) => ({
+            id: match.fixture.id.toString(),
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            homeLogo: match.teams.home.logo,
+            awayLogo: match.teams.away.logo,
+            homeScore: match.goals.home,
+            awayScore: match.goals.away,
+            status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
+                   match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
+            league: match.league.name,
+            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            })
+          })),
+          ...(data.data.thisWeekMatches || []).slice(0, 3).map((match: any) => ({
+            id: match.fixture.id.toString(),
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            homeLogo: match.teams.home.logo,
+            awayLogo: match.teams.away.logo,
+            homeScore: match.goals.home,
+            awayScore: match.goals.away,
+            status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
+                   match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
+            league: match.league.name,
+            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            })
+          })),
+          ...(data.data.previousWeekMatches || []).slice(0, 2).map((match: any) => ({
+            id: match.fixture.id.toString(),
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            homeLogo: match.teams.home.logo,
+            awayLogo: match.teams.away.logo,
+            homeScore: match.goals.home,
+            awayScore: match.goals.away,
+            status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
+                   match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
+            league: match.league.name,
+            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            })
+          }))
+        ]
+        
+        setLiveMatches(convertedMatches)
+      } catch (error) {
+        console.error('Error fetching Premier League data:', error)
+        // Fallback to mock data on error
+        setLiveMatches(mockMatches)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPremierLeagueData()
+  }, [])
 
   useEffect(() => {
     // Auto-rotate matches every 5 seconds
     const interval = setInterval(() => {
-      setCurrentMatchIndex((prevIndex) => (prevIndex + 1) % liveMatches.length)
+      if (liveMatches.length > 0) {
+        setCurrentMatchIndex((prevIndex) => (prevIndex + 1) % liveMatches.length)
+      }
     }, 5000)
 
     return () => clearInterval(interval)
@@ -188,6 +301,27 @@ export default function LiveScoresTicker() {
     }
   }
 
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-purple-600 to-indigo-600 py-2"
+      >
+        <div className="w-full px-6 sm:px-6 lg:max-w-7xl lg:mx-auto lg:px-8">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-white" />
+              <span className="text-white font-semibold text-xs">
+                Loading live scores...
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
   if (liveMatches.length === 0) {
     return (
       <motion.div
@@ -234,18 +368,42 @@ export default function LiveScoresTicker() {
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/20 flex-1 justify-between mx-3"
             >
               <div className="flex items-center gap-2">
-                <span className="text-white text-xs font-medium whitespace-nowrap">
-                  {liveMatches[currentMatchIndex].homeTeam}
-                </span>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-4 rounded-full shadow-lg p-0.5 bg-white/10">
+                    <img 
+                      src={liveMatches[currentMatchIndex].homeLogo} 
+                      alt={liveMatches[currentMatchIndex].homeTeam}
+                      className="w-full h-full rounded-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                      }}
+                    />
+                  </div>
+                  <span className="text-white text-xs font-medium whitespace-nowrap">
+                    {liveMatches[currentMatchIndex].homeTeam}
+                  </span>
+                </div>
                 <span className="text-white font-bold text-xs whitespace-nowrap">
-                  {liveMatches[currentMatchIndex].status === 'live' || liveMatches[currentMatchIndex].status === 'finished' 
+                  {liveMatches[currentMatchIndex].homeScore !== null && liveMatches[currentMatchIndex].awayScore !== null
                     ? `${liveMatches[currentMatchIndex].homeScore}-${liveMatches[currentMatchIndex].awayScore}` 
                     : 'vs'
                   }
                 </span>
-                <span className="text-white text-xs font-medium whitespace-nowrap">
-                  {liveMatches[currentMatchIndex].awayTeam}
-                </span>
+                <div className="flex items-center gap-1">
+                  <span className="text-white text-xs font-medium whitespace-nowrap">
+                    {liveMatches[currentMatchIndex].awayTeam}
+                  </span>
+                  <div className="w-4 h-4 rounded-full shadow-lg p-0.5 bg-white/10">
+                    <img 
+                      src={liveMatches[currentMatchIndex].awayLogo} 
+                      alt={liveMatches[currentMatchIndex].awayTeam}
+                      className="w-full h-full rounded-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
               
               <div className={`text-xs font-medium ${getStatusColor(liveMatches[currentMatchIndex].status)}`}>
@@ -291,14 +449,38 @@ export default function LiveScoresTicker() {
                   }`}
                 >
                   <div className="flex items-center gap-1">
-                    <span className="text-white text-xs font-medium whitespace-nowrap">{match.homeTeam}</span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full shadow-lg p-0.5 bg-white/10">
+                        <img 
+                          src={match.homeLogo} 
+                          alt={match.homeTeam}
+                          className="w-full h-full rounded-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                          }}
+                        />
+                      </div>
+                      <span className="text-white text-xs font-medium whitespace-nowrap">{match.homeTeam}</span>
+                    </div>
                     <span className="text-white font-bold text-xs whitespace-nowrap">
-                      {match.status === 'live' || match.status === 'finished' 
+                      {match.homeScore !== null && match.awayScore !== null
                         ? `${match.homeScore}-${match.awayScore}` 
                         : 'vs'
                       }
                     </span>
-                    <span className="text-white text-xs font-medium whitespace-nowrap">{match.awayTeam}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-white text-xs font-medium whitespace-nowrap">{match.awayTeam}</span>
+                      <div className="w-3 h-3 rounded-full shadow-lg p-0.5 bg-white/10">
+                        <img 
+                          src={match.awayLogo} 
+                          alt={match.awayTeam}
+                          className="w-full h-full rounded-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-1">
@@ -363,14 +545,38 @@ export default function LiveScoresTicker() {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                    <span className="text-white text-xs font-medium whitespace-nowrap">{match.homeTeam}</span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 rounded-full shadow-lg p-0.5 bg-white/10">
+                        <img 
+                          src={match.homeLogo} 
+                          alt={match.homeTeam}
+                          className="w-full h-full rounded-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                          }}
+                        />
+                      </div>
+                      <span className="text-white text-xs font-medium whitespace-nowrap">{match.homeTeam}</span>
+                    </div>
                     <span className="text-white font-bold text-xs whitespace-nowrap">
-                      {match.status === 'live' || match.status === 'finished' 
+                      {match.homeScore !== null && match.awayScore !== null
                         ? `${match.homeScore}-${match.awayScore}` 
                         : 'vs'
                       }
                     </span>
-                    <span className="text-white text-xs font-medium whitespace-nowrap">{match.awayTeam}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-white text-xs font-medium whitespace-nowrap">{match.awayTeam}</span>
+                      <div className="w-4 h-4 rounded-full shadow-lg p-0.5 bg-white/10">
+                        <img 
+                          src={match.awayLogo} 
+                          alt={match.awayTeam}
+                          className="w-full h-full rounded-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                          }}
+                        />
+                      </div>
+                    </div>
                 </div>
                 
                 <div className="flex items-center gap-2">

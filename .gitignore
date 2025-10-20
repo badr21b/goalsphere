@@ -1,1 +1,44 @@
+# Node / Next.js
+node_modules/
+.npm/
+.pnp.cjs
+.pnp.loader.mjs
+
+# Next.js build output
+.next/
+.next/cache/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Env files (keep locally, never commit secrets)
+.env*
+!.env.example
+
+# Coverage / testing
+coverage/
+.jest/
+nyc_output/
+
+# Vercel / Deploy
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+*.log
+*.tmp
+
 node_modules
