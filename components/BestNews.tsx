@@ -1,33 +1,38 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Trophy, ExternalLink, Calendar, Clock } from 'lucide-react'
-import { FootballNews } from '@/lib/types'
-import { useBestNews } from '@/hooks/useBestNews'
+import { useEffect } from "react";
+import { motion } from "framer-motion";
+import { Trophy, ExternalLink, Calendar, Clock } from "lucide-react";
+import { FootballNews } from "@/lib/types";
+import { useBestNews } from "@/hooks/useBestNews";
 
 interface BestNewsProps {
-  selectedCategory?: string | null
-  newsItems: FootballNews[]
+  selectedCategory?: string | null;
+  newsItems: FootballNews[];
 }
 
-export default function BestNews({ selectedCategory, newsItems }: BestNewsProps) {
-  const { getBestNews, isLoading, error, fetchBestNews } = useBestNews()
-  const category = selectedCategory || 'all'
-  const bestNews = getBestNews(category)
+export default function BestNews({
+  selectedCategory,
+  newsItems,
+}: BestNewsProps) {
+  const { getBestNews, isLoading, error, fetchBestNews } = useBestNews();
+  const category = selectedCategory || "all";
+  const bestNews = getBestNews(category);
 
   useEffect(() => {
     // Debug: log incoming news items per category
     try {
       // eslint-disable-next-line no-console
-      console.log('[BestNews] incoming newsItems', {
+      console.log("[BestNews] incoming newsItems", {
         category,
         count: newsItems?.length || 0,
-        sample: (newsItems || []).slice(0, 5).map(n => ({ id: n.id, title: n.title }))
-      })
+        sample: (newsItems || [])
+          .slice(0, 5)
+          .map((n) => ({ id: n.id, title: n.title })),
+      });
     } catch {}
-    fetchBestNews(category, newsItems)
-  }, [category, newsItems])
+    fetchBestNews(category, newsItems);
+  }, [category, newsItems]);
 
   // If data still loading (including when list is empty), show loader card to avoid empty state flash
   if (isLoading || !newsItems || newsItems.length === 0) {
@@ -41,7 +46,7 @@ export default function BestNews({ selectedCategory, newsItems }: BestNewsProps)
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
         </div>
       </motion.div>
-    )
+    );
   }
 
   if (error || !bestNews) {
@@ -56,7 +61,7 @@ export default function BestNews({ selectedCategory, newsItems }: BestNewsProps)
           <p className="text-sm">No featured news available</p>
         </div>
       </motion.div>
-    )
+    );
   }
 
   return (
@@ -85,7 +90,17 @@ export default function BestNews({ selectedCategory, newsItems }: BestNewsProps)
           alt={bestNews.title}
           className="w-full h-32 object-cover"
           onError={(e) => {
-            e.currentTarget.src = '/images/placeholder-news.jpg'
+            // Use high-quality football images as fallback
+            const fallbackImages = [
+              "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center",
+              "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center",
+              "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center",
+              "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center",
+              "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center",
+            ];
+            const randomFallback =
+              fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+            e.currentTarget.src = randomFallback;
           }}
         />
         <div className="absolute top-2 left-2">
@@ -100,7 +115,7 @@ export default function BestNews({ selectedCategory, newsItems }: BestNewsProps)
         <h4 className="text-sm font-bold text-white leading-tight line-clamp-2">
           {bestNews.title}
         </h4>
-        
+
         <p className="text-xs text-gray-300 leading-relaxed line-clamp-3 flex-1">
           {bestNews.description}
         </p>
@@ -111,24 +126,24 @@ export default function BestNews({ selectedCategory, newsItems }: BestNewsProps)
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               <span>
-                {new Date(bestNews.publishedAt).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'short'
+                {new Date(bestNews.publishedAt).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
                 })}
               </span>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               <span>
-                {new Date(bestNews.publishedAt).toLocaleTimeString('en-GB', {
-                  hour: '2-digit',
-                  minute: '2-digit'
+                {new Date(bestNews.publishedAt).toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}
               </span>
             </div>
           </div>
-          
-          <a 
+
+          <a
             href={bestNews.link}
             className="flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
           >
@@ -138,5 +153,5 @@ export default function BestNews({ selectedCategory, newsItems }: BestNewsProps)
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

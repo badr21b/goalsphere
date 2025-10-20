@@ -81,12 +81,23 @@ export const useBestNews = () => {
       let bestNewsItem: FootballNews | null = null
 
       if (generatedNews) {
+        // Use high-quality football images as fallback
+        const fallbackImages = [
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center'
+        ];
+        
+        const randomFallback = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
         // Convert GeneratedContent to FootballNews format
         bestNewsItem = {
           id: `best-${Date.now()}`,
           title: generatedNews.title,
           description: generatedNews.content,
-          image: generatedNews.thumbnail || '/images/placeholder-news.jpg',
+          image: generatedNews.thumbnail || randomFallback,
           publishedAt: generatedNews.publishedAt,
           category: generatedNews.category,
           link: `/article/${generatedNews.id || `best-${Date.now()}`}`,
@@ -149,11 +160,22 @@ export const useBestNews = () => {
           dispatch(setBestNews({ category: cat, news: null }))
           return
         }
+        // Use high-quality football images as fallback
+        const fallbackImages = [
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center'
+        ];
+        
+        const randomFallback = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
         const converted: FootballNews = {
           id: `best-${cat}-${Date.now()}`,
           title: item.title,
           description: item.content,
-          image: item.thumbnail || '/images/placeholder-news.jpg',
+          image: item.thumbnail || randomFallback,
           publishedAt: item.publishedAt,
           category: cat,
           link: `/article/best-${cat}`,

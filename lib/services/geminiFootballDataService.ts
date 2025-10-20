@@ -230,6 +230,16 @@ export class GeminiFootballDataService {
   }
 
   private getFallbackNews(): GeneratedContent[] {
+    const fallbackImages = [
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center'
+    ];
+    
+    const randomImage = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
     return [
       {
         title: 'Latest Football Updates',
@@ -237,7 +247,7 @@ export class GeminiFootballDataService {
         summary: 'Breaking football news and updates',
         category: 'News',
         publishedAt: new Date().toISOString(),
-        thumbnail: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
+        thumbnail: randomImage,
         tags: ['football', 'news'],
         source: 'gemini_generated'
       }
@@ -245,13 +255,23 @@ export class GeminiFootballDataService {
   }
 
   private getFallbackFeaturedNews(): GeneratedContent {
+    const fallbackImages = [
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center'
+    ];
+    
+    const randomImage = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
     return {
       title: 'Featured Football News',
       content: 'Featured football news and analysis.',
       summary: 'Top football story of the day',
       category: 'Featured',
       publishedAt: new Date().toISOString(),
-      thumbnail: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=400&fit=crop',
+      thumbnail: randomImage,
       tags: ['featured', 'football'],
       source: 'gemini_generated'
     };

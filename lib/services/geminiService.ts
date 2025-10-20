@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export interface GeminiConfig {
   apiKey: string;
@@ -6,7 +6,7 @@ export interface GeminiConfig {
 }
 
 export interface SportsDataRequest {
-  type: 'live_scores' | 'news' | 'standings' | 'fixtures' | 'teams' | 'leagues';
+  type: "live_scores" | "news" | "standings" | "fixtures" | "teams" | "leagues";
   league?: string;
   team?: string;
   date?: string;
@@ -21,7 +21,7 @@ export interface GeneratedContent {
   publishedAt: string;
   thumbnail?: string;
   tags: string[];
-  source: 'gemini_generated';
+  source: "gemini_generated";
 }
 
 export interface BestNewsRequest {
@@ -46,16 +46,16 @@ export interface LiveMatchData {
     home: number;
     away: number;
   };
-  status: 'Live' | 'Finished' | 'Scheduled';
+  status: "Live" | "Finished" | "Scheduled";
   league: string;
   venue: string;
   timestamp: string;
   minute?: number;
   events?: Array<{
-    type: 'goal' | 'card' | 'substitution';
+    type: "goal" | "card" | "substitution";
     player: string;
     minute: number;
-    team: 'home' | 'away';
+    team: "home" | "away";
   }>;
 }
 
@@ -65,17 +65,17 @@ export class GeminiService {
 
   constructor(config: GeminiConfig) {
     if (!config.apiKey) {
-      throw new Error('Gemini API key is required');
+      throw new Error("Gemini API key is required");
     }
-    
+
     try {
       this.genAI = new GoogleGenerativeAI(config.apiKey);
-      this.model = this.genAI.getGenerativeModel({ 
-        model: config.model || 'gemini-2.5-flash' 
+      this.model = this.genAI.getGenerativeModel({
+        model: config.model || "gemini-2.5-flash",
       });
     } catch (error) {
-      console.error('Failed to initialize Gemini service:', error);
-      throw new Error('Failed to initialize Gemini service');
+      console.error("Failed to initialize Gemini service:", error);
+      throw new Error("Failed to initialize Gemini service");
     }
   }
 
@@ -86,13 +86,13 @@ export class GeminiService {
     try {
       // First, get raw data from TheSportsDB
       const rawData = await this.fetchFromTheSportsDB(request);
-      
+
       // Process the data with Gemini
       const processedData = await this.processWithGemini(rawData, request);
-      
+
       return processedData;
     } catch (error) {
-      console.error('Error fetching and processing sports data:', error);
+      console.error("Error fetching and processing sports data:", error);
       throw error;
     }
   }
@@ -101,39 +101,39 @@ export class GeminiService {
    * Fetch raw data from TheSportsDB API
    */
   private async fetchFromTheSportsDB(request: SportsDataRequest): Promise<any> {
-    const baseUrl = 'https://www.thesportsdb.com/api/v1/json/123'; // Using free API key
-    
-    let endpoint = '';
+    const baseUrl = "https://www.thesportsdb.com/api/v1/json/123"; // Using free API key
+
+    let endpoint = "";
     let params = new URLSearchParams();
 
     switch (request.type) {
-      case 'live_scores':
-        endpoint = '/livescore.php';
+      case "live_scores":
+        endpoint = "/livescore.php";
         if (request.league) {
-          params.append('s', request.league);
+          params.append("s", request.league);
         }
         break;
-      case 'fixtures':
-        endpoint = '/eventsday.php';
+      case "fixtures":
+        endpoint = "/eventsday.php";
         if (request.date) {
-          params.append('d', request.date);
+          params.append("d", request.date);
         } else {
-          params.append('d', new Date().toISOString().split('T')[0]);
+          params.append("d", new Date().toISOString().split("T")[0]);
         }
         break;
-      case 'teams':
-        endpoint = '/searchteams.php';
+      case "teams":
+        endpoint = "/searchteams.php";
         if (request.team) {
-          params.append('t', request.team);
+          params.append("t", request.team);
         }
         break;
-      case 'leagues':
-        endpoint = '/all_leagues.php';
+      case "leagues":
+        endpoint = "/all_leagues.php";
         break;
-      case 'standings':
-        endpoint = '/lookuptable.php';
+      case "standings":
+        endpoint = "/lookuptable.php";
         if (request.league) {
-          params.append('l', request.league);
+          params.append("l", request.league);
         }
         break;
       default:
@@ -141,7 +141,7 @@ export class GeminiService {
     }
 
     const url = `${baseUrl}${endpoint}?${params.toString()}`;
-    
+
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -149,7 +149,7 @@ export class GeminiService {
       }
       return await response.json();
     } catch (error) {
-      console.error('Error fetching from TheSportsDB:', error);
+      console.error("Error fetching from TheSportsDB:", error);
       // Return mock data if API fails
       return this.getMockTheSportsDBData(request);
     }
@@ -158,25 +158,28 @@ export class GeminiService {
   /**
    * Process raw data with Gemini AI
    */
-  private async processWithGemini(rawData: any, request: SportsDataRequest): Promise<any> {
+  private async processWithGemini(
+    rawData: any,
+    request: SportsDataRequest
+  ): Promise<any> {
     const prompt = this.buildProcessingPrompt(rawData, request);
-    
+
     try {
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      
+
       // Parse the JSON response from Gemini
       const parsedData = JSON.parse(text);
       return parsedData;
     } catch (error) {
-      console.error('Error processing with Gemini:', error);
-      
+      console.error("Error processing with Gemini:", error);
+
       // Check if it's an API key error
-      if (error instanceof Error && error.message.includes('API key')) {
-        console.warn('Gemini API key error, using fallback processing');
+      if (error instanceof Error && error.message.includes("API key")) {
+        console.warn("Gemini API key error, using fallback processing");
       }
-      
+
       // Fallback to basic processing
       return this.basicDataProcessing(rawData, request);
     }
@@ -185,9 +188,12 @@ export class GeminiService {
   /**
    * Build processing prompt for Gemini
    */
-  private buildProcessingPrompt(rawData: any, request: SportsDataRequest): string {
+  private buildProcessingPrompt(
+    rawData: any,
+    request: SportsDataRequest
+  ): string {
     const currentDate = new Date().toISOString();
-    
+
     let prompt = `You are a sports data expert. Process the following raw data from TheSportsDB API and return a JSON response that matches our application's schema.
 
 Raw Data:
@@ -201,7 +207,7 @@ Please process this data and return a JSON object with the following structure b
 `;
 
     switch (request.type) {
-      case 'live_scores':
+      case "live_scores":
         prompt += `{
   "liveMatches": [
     {
@@ -227,7 +233,7 @@ Please process this data and return a JSON object with the following structure b
   "lastUpdated": "ISO string"
 }`;
         break;
-      case 'news':
+      case "news":
         prompt += `{
   "articles": [
     {
@@ -255,7 +261,7 @@ Please process this data and return a JSON object with the following structure b
   }
 }`;
         break;
-      case 'standings':
+      case "standings":
         prompt += `{
   "standings": [
     {
@@ -276,7 +282,7 @@ Please process this data and return a JSON object with the following structure b
   "lastUpdated": "ISO string"
 }`;
         break;
-      case 'fixtures':
+      case "fixtures":
         prompt += `{
   "fixtures": [
     {
@@ -314,10 +320,26 @@ Current time context: ${new Date().toLocaleString()}`;
   /**
    * Generate news content using Gemini
    */
-  async generateNewsContent(topic: string, context?: any): Promise<GeneratedContent> {
+  async generateNewsContent(
+    topic: string,
+    context?: any
+  ): Promise<GeneratedContent> {
+    const fallbackImages = [
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&h=300&fit=crop&crop=center",
+    ];
+
+    const randomImage =
+      fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
     const prompt = `Generate a comprehensive football news article about: ${topic}
 
-Context: ${context ? JSON.stringify(context) : 'General football news'}
+Context: ${context ? JSON.stringify(context) : "General football news"}
 
 Create a detailed, engaging article with:
 - Compelling headline
@@ -327,6 +349,8 @@ Create a detailed, engaging article with:
 - Appropriate tags
 - Realistic publication time
 
+Use this specific image URL: ${randomImage}
+
 Return as JSON:
 {
   "title": "string",
@@ -334,7 +358,7 @@ Return as JSON:
   "summary": "string", 
   "category": "string",
   "publishedAt": "ISO string",
-  "thumbnail": "string (unsplash image URL)",
+  "thumbnail": "${randomImage}",
   "tags": ["string"],
   "source": "gemini_generated"
 }`;
@@ -343,9 +367,16 @@ Return as JSON:
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      return JSON.parse(text);
+      const parsed = JSON.parse(text);
+
+      // Ensure the image URL is set
+      if (!parsed.thumbnail) {
+        parsed.thumbnail = randomImage;
+      }
+
+      return parsed;
     } catch (error) {
-      console.error('Error generating news content:', error);
+      console.error("Error generating news content:", error);
       return this.getFallbackNewsContent(topic);
     }
   }
@@ -353,49 +384,55 @@ Return as JSON:
   /**
    * Get live scores with AI enhancement
    */
-  async getLiveScores(league?: string): Promise<{ liveMatches: LiveMatchData[]; lastUpdated: string }> {
+  async getLiveScores(
+    league?: string
+  ): Promise<{ liveMatches: LiveMatchData[]; lastUpdated: string }> {
     const request: SportsDataRequest = {
-      type: 'live_scores',
-      league: league || 'soccer'
+      type: "live_scores",
+      league: league || "soccer",
     };
 
     const data = await this.fetchAndProcessSportsData(request);
     return {
       liveMatches: data.liveMatches || [],
-      lastUpdated: data.lastUpdated || new Date().toISOString()
+      lastUpdated: data.lastUpdated || new Date().toISOString(),
     };
   }
 
   /**
    * Get today's fixtures
    */
-  async getTodaysFixtures(league?: string): Promise<{ fixtures: any[]; lastUpdated: string }> {
+  async getTodaysFixtures(
+    league?: string
+  ): Promise<{ fixtures: any[]; lastUpdated: string }> {
     const request: SportsDataRequest = {
-      type: 'fixtures',
-      date: new Date().toISOString().split('T')[0],
-      league
+      type: "fixtures",
+      date: new Date().toISOString().split("T")[0],
+      league,
     };
 
     const data = await this.fetchAndProcessSportsData(request);
     return {
       fixtures: data.fixtures || [],
-      lastUpdated: data.lastUpdated || new Date().toISOString()
+      lastUpdated: data.lastUpdated || new Date().toISOString(),
     };
   }
 
   /**
    * Get league standings
    */
-  async getLeagueStandings(league: string): Promise<{ standings: any[]; lastUpdated: string }> {
+  async getLeagueStandings(
+    league: string
+  ): Promise<{ standings: any[]; lastUpdated: string }> {
     const request: SportsDataRequest = {
-      type: 'standings',
-      league
+      type: "standings",
+      league,
     };
 
     const data = await this.fetchAndProcessSportsData(request);
     return {
       standings: data.standings || [],
-      lastUpdated: data.lastUpdated || new Date().toISOString()
+      lastUpdated: data.lastUpdated || new Date().toISOString(),
     };
   }
 
@@ -404,16 +441,50 @@ Return as JSON:
    */
   async generateBreakingNews(): Promise<GeneratedContent[]> {
     const topics = [
-      'Premier League transfer news',
-      'Champions League latest updates',
-      'Major football injuries and returns',
-      'Manager changes and rumors',
-      'International football news'
+      "Premier League transfer news",
+      "Champions League latest updates",
+      "Major football injuries and returns",
+      "Manager changes and rumors",
+      "International football news",
+    ];
+
+    const fallbackImages = [
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&h=300&fit=crop&crop=center",
     ];
 
     const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-    const news = await this.generateNewsContent(randomTopic);
-    return [news];
+    const randomImage =
+      fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
+    try {
+      const news = await this.generateNewsContent(randomTopic);
+      // Ensure the image is set
+      if (!news.thumbnail) {
+        news.thumbnail = randomImage;
+      }
+      return [news];
+    } catch (error) {
+      console.error("Error generating breaking news:", error);
+      // Return fallback news with guaranteed image
+      return [
+        {
+          title: `Breaking: ${randomTopic}`,
+          content: `Stay tuned for the latest developments in ${randomTopic}. We're working to bring you the most up-to-date information.`,
+          summary: `Breaking news and updates about ${randomTopic}`,
+          category: "breaking",
+          publishedAt: new Date().toISOString(),
+          thumbnail: randomImage,
+          tags: ["breaking", "football"],
+          source: "gemini_generated",
+        },
+      ];
+    }
   }
 
   /**
@@ -422,56 +493,58 @@ Return as JSON:
   private basicDataProcessing(rawData: any, request: SportsDataRequest): any {
     // Basic processing without AI enhancement
     switch (request.type) {
-      case 'live_scores':
+      case "live_scores":
         const liveMatches = (rawData.events || []).map((event: any) => ({
           match_id: event.idEvent || event.id,
           home_team: event.strHomeTeam || event.homeTeam,
           away_team: event.strAwayTeam || event.awayTeam,
           score: {
             home: parseInt(event.intHomeScore) || 0,
-            away: parseInt(event.intAwayScore) || 0
+            away: parseInt(event.intAwayScore) || 0,
           },
-          status: event.strStatus === 'Live' ? 'Live' : 'Finished',
-          league: event.strLeague || 'Unknown League',
-          venue: event.strVenue || 'Unknown Venue',
-          timestamp: event.dateEvent || new Date().toISOString()
+          status: event.strStatus === "Live" ? "Live" : "Finished",
+          league: event.strLeague || "Unknown League",
+          venue: event.strVenue || "Unknown Venue",
+          timestamp: event.dateEvent || new Date().toISOString(),
         }));
         return {
           liveMatches,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
         };
-      case 'fixtures':
+      case "fixtures":
         const fixtures = (rawData.events || []).map((event: any) => ({
           match_id: event.idEvent || event.id,
           home_team: event.strHomeTeam || event.homeTeam,
           away_team: event.strAwayTeam || event.awayTeam,
-          status: 'Scheduled',
-          league: event.strLeague || 'Unknown League',
-          venue: event.strVenue || 'Unknown Venue',
-          timestamp: event.dateEvent || new Date().toISOString()
+          status: "Scheduled",
+          league: event.strLeague || "Unknown League",
+          venue: event.strVenue || "Unknown Venue",
+          timestamp: event.dateEvent || new Date().toISOString(),
         }));
         return {
           fixtures,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
         };
-      case 'standings':
-        const standings = (rawData.table || []).map((team: any, index: number) => ({
-          team_id: team.idTeam || index + 1,
-          team_name: team.strTeam || `Team ${index + 1}`,
-          position: team.intRank || index + 1,
-          points: parseInt(team.intPoints) || 0,
-          played: parseInt(team.intPlayed) || 0,
-          won: parseInt(team.intWin) || 0,
-          drawn: parseInt(team.intDraw) || 0,
-          lost: parseInt(team.intLoss) || 0,
-          goals_for: parseInt(team.intGoalsFor) || 0,
-          goals_against: parseInt(team.intGoalsAgainst) || 0,
-          goal_difference: parseInt(team.intGoalDifference) || 0,
-          league: 'Premier League'
-        }));
+      case "standings":
+        const standings = (rawData.table || []).map(
+          (team: any, index: number) => ({
+            team_id: team.idTeam || index + 1,
+            team_name: team.strTeam || `Team ${index + 1}`,
+            position: team.intRank || index + 1,
+            points: parseInt(team.intPoints) || 0,
+            played: parseInt(team.intPlayed) || 0,
+            won: parseInt(team.intWin) || 0,
+            drawn: parseInt(team.intDraw) || 0,
+            lost: parseInt(team.intLoss) || 0,
+            goals_for: parseInt(team.intGoalsFor) || 0,
+            goals_against: parseInt(team.intGoalsAgainst) || 0,
+            goal_difference: parseInt(team.intGoalDifference) || 0,
+            league: "Premier League",
+          })
+        );
         return {
           standings,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
         };
       default:
         return rawData;
@@ -483,39 +556,39 @@ Return as JSON:
    */
   private getMockTheSportsDBData(request: SportsDataRequest): any {
     switch (request.type) {
-      case 'live_scores':
+      case "live_scores":
         return {
           events: [
             {
-              idEvent: '1',
-              strEvent: 'Arsenal vs Chelsea',
-              strHomeTeam: 'Arsenal',
-              strAwayTeam: 'Chelsea',
-              intHomeScore: '2',
-              intAwayScore: '1',
-              strStatus: 'Live',
-              strLeague: 'Premier League',
-              strVenue: 'Emirates Stadium',
-              dateEvent: new Date().toISOString().split('T')[0],
-              strTime: new Date().toTimeString().split(' ')[0]
-            }
-          ]
+              idEvent: "1",
+              strEvent: "Arsenal vs Chelsea",
+              strHomeTeam: "Arsenal",
+              strAwayTeam: "Chelsea",
+              intHomeScore: "2",
+              intAwayScore: "1",
+              strStatus: "Live",
+              strLeague: "Premier League",
+              strVenue: "Emirates Stadium",
+              dateEvent: new Date().toISOString().split("T")[0],
+              strTime: new Date().toTimeString().split(" ")[0],
+            },
+          ],
         };
-      case 'fixtures':
+      case "fixtures":
         return {
           events: [
             {
-              idEvent: '2',
-              strEvent: 'Brighton vs Newcastle',
-              strHomeTeam: 'Brighton',
-              strAwayTeam: 'Newcastle',
-              strStatus: 'Scheduled',
-              strLeague: 'Premier League',
-              strVenue: 'Amex Stadium',
-              dateEvent: new Date().toISOString().split('T')[0],
-              strTime: '15:00:00'
-            }
-          ]
+              idEvent: "2",
+              strEvent: "Brighton vs Newcastle",
+              strHomeTeam: "Brighton",
+              strAwayTeam: "Newcastle",
+              strStatus: "Scheduled",
+              strLeague: "Premier League",
+              strVenue: "Amex Stadium",
+              dateEvent: new Date().toISOString().split("T")[0],
+              strTime: "15:00:00",
+            },
+          ],
         };
       default:
         return { events: [] };
@@ -526,30 +599,49 @@ Return as JSON:
    * Fallback news content
    */
   private getFallbackNewsContent(topic: string): GeneratedContent {
+    const fallbackImages = [
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=400&h=300&fit=crop&crop=center",
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center",
+    ];
+
+    const randomImage =
+      fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
     return {
       title: `Latest updates on ${topic}`,
       content: `Stay tuned for the latest developments in ${topic}. We're working to bring you the most up-to-date information.`,
       summary: `Breaking news and updates about ${topic}`,
-      category: 'News',
+      category: "News",
       publishedAt: new Date().toISOString(),
-      thumbnail: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
+      thumbnail: randomImage,
       tags: [topic.toLowerCase()],
-      source: 'gemini_generated'
+      source: "gemini_generated",
     };
   }
 
   /**
    * Generate best news from a list of news items
    */
-  async generateBestNews(request: BestNewsRequest): Promise<GeneratedContent | null> {
+  async generateBestNews(
+    request: BestNewsRequest
+  ): Promise<GeneratedContent | null> {
     try {
       if (!request.newsItems || request.newsItems.length === 0) {
         return null;
       }
 
-      const newsList = request.newsItems.map(item =>
-        `Title: ${item.title}\nDescription: ${item.description}\nLeague: ${item.league.name} (${item.league.country})\nImage: ${item.image}\nPublished: ${item.publishedAt}`
-      ).join('\n\n---\n\n');
+      const newsList = request.newsItems
+        .map(
+          (item) =>
+            `Title: ${item.title}\nDescription: ${item.description}\nLeague: ${item.league.name} (${item.league.country})\nImage: ${item.image}\nPublished: ${item.publishedAt}`
+        )
+        .join("\n\n---\n\n");
 
       const prompt = `
         You are an expert football journalist. Analyze the following recent news articles related to the category "${request.category}" and identify the single most important, impactful, or interesting news story.
@@ -584,41 +676,61 @@ Return as JSON:
       try {
         // Remove markdown code fences if present
         const withoutFences = text
-          .replace(/```json[\s\S]*?\n/, '```')
-          .replace(/```/g, '')
+          .replace(/```json[\s\S]*?\n/, "```")
+          .replace(/```/g, "")
           .trim();
         const jsonSliceMatch = withoutFences.match(/\{[\s\S]*\}/);
-        const jsonCandidate = jsonSliceMatch ? jsonSliceMatch[0] : withoutFences;
+        const jsonCandidate = jsonSliceMatch
+          ? jsonSliceMatch[0]
+          : withoutFences;
         parsedContent = JSON.parse(jsonCandidate);
       } catch {}
 
       try {
-        if (parsedContent.title && parsedContent.content && parsedContent.summary && parsedContent.thumbnail) {
+        if (
+          parsedContent.title &&
+          parsedContent.content &&
+          parsedContent.summary &&
+          parsedContent.thumbnail
+        ) {
           return {
             ...parsedContent,
-            source: 'gemini_generated',
+            source: "gemini_generated",
             publishedAt: parsedContent.publishedAt || new Date().toISOString(),
             tags: parsedContent.tags || [],
           };
         }
       } catch (jsonError) {
-        console.warn('Gemini response for best news was not valid JSON, attempting to extract text:', jsonError);
+        console.warn(
+          "Gemini response for best news was not valid JSON, attempting to extract text:",
+          jsonError
+        );
       }
 
       // Fallback if not JSON or invalid JSON
+      const fallbackImages = [
+        "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center",
+        "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center",
+        "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center",
+        "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center",
+        "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center",
+      ];
+
+      const randomFallback =
+        fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
       return {
         title: `Featured News for ${request.category}`,
         content: text,
-        summary: text.substring(0, 150) + '...',
+        summary: text.substring(0, 150) + "...",
         category: request.category,
         publishedAt: new Date().toISOString(),
-        tags: ['gemini', 'featured'],
-        source: 'gemini_generated',
-        thumbnail: request.newsItems[0]?.image || '/images/placeholder-news.jpg',
+        tags: ["gemini", "featured"],
+        source: "gemini_generated",
+        thumbnail: request.newsItems[0]?.image || randomFallback,
       };
-
     } catch (error) {
-      console.error('Error generating best news with Gemini:', error);
+      console.error("Error generating best news with Gemini:", error);
       return null;
     }
   }
@@ -626,50 +738,76 @@ Return as JSON:
   /**
    * Generate best news for multiple categories in one request to reduce latency
    */
-  async generateBestNewsBatch(requests: BestNewsRequest[]): Promise<Record<string, GeneratedContent | null>> {
-    const results: Record<string, GeneratedContent | null> = {}
+  async generateBestNewsBatch(
+    requests: BestNewsRequest[]
+  ): Promise<Record<string, GeneratedContent | null>> {
+    const results: Record<string, GeneratedContent | null> = {};
     try {
       // Compose one batched prompt with clear separators
-      const parts = requests.map((req, idx) => {
-        const list = req.newsItems.map(item => `- ${item.title} | ${item.league.name} | ${item.publishedAt}\n${item.description}` ).join('\n')
-        return `SECTION ${idx + 1} - CATEGORY: ${req.category.toUpperCase()}\n${list}`
-      }).join('\n\n')
+      const parts = requests
+        .map((req, idx) => {
+          const list = req.newsItems
+            .map(
+              (item) =>
+                `- ${item.title} | ${item.league.name} | ${item.publishedAt}\n${item.description}`
+            )
+            .join("\n");
+          return `SECTION ${
+            idx + 1
+          } - CATEGORY: ${req.category.toUpperCase()}\n${list}`;
+        })
+        .join("\n\n");
 
       const prompt = `You are an expert football editor. For each section below, pick exactly ONE most important story and rewrite it (100-150 words).\n\n${parts}\n\nReturn STRICT JSON as an array where each entry matches the input order:\n[{"category":"<slug>","title":"...","content":"...","summary":"...","thumbnail":"<image-url>","publishedAt":"<iso>","tags":["featured"],"source":"gemini_generated"}]`;
 
-      const result = await this.model.generateContent(prompt)
-      const response = await result.response
-      const text = response.text()
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
 
       // Coerce JSON like above
-      let parsed: any[] | null = null
+      let parsed: any[] | null = null;
       try {
-        const cleaned = text.replace(/```json[\s\S]*?\n/, '```').replace(/```/g, '').trim()
-        const arrayMatch = cleaned.match(/\[[\s\S]*\]/)
-        const candidate = arrayMatch ? arrayMatch[0] : cleaned
-        parsed = JSON.parse(candidate)
+        const cleaned = text
+          .replace(/```json[\s\S]*?\n/, "```")
+          .replace(/```/g, "")
+          .trim();
+        const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
+        const candidate = arrayMatch ? arrayMatch[0] : cleaned;
+        parsed = JSON.parse(candidate);
       } catch {}
 
       if (Array.isArray(parsed)) {
+        const fallbackImages = [
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center",
+          "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center",
+          "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center",
+          "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center",
+          "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center",
+        ];
+
         parsed.forEach((item: any) => {
           if (item && item.category) {
+            const randomFallback =
+              fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
             results[item.category] = {
               ...item,
               publishedAt: item.publishedAt || new Date().toISOString(),
-              source: 'gemini_generated',
-              tags: item.tags || []
-            }
+              source: "gemini_generated",
+              tags: item.tags || [],
+              thumbnail: item.thumbnail || randomFallback,
+            };
           }
-        })
+        });
       }
     } catch (e) {
-      console.error('Error in generateBestNewsBatch', e)
+      console.error("Error in generateBestNewsBatch", e);
     }
-    return results
+    return results;
   }
 }
 
 // Export singleton instance
 export const geminiService = new GeminiService({
-  apiKey: process.env.GEMINI_API_KEY || 'AIzaSyAYa0GQvGmLaIjMHqZrvheiCApZnVnnO2I' // Fallback to your key
+  apiKey:
+    process.env.GEMINI_API_KEY || "AIzaSyAYa0GQvGmLaIjMHqZrvheiCApZnVnnO2I", // Fallback to your key
 });

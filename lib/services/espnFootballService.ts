@@ -384,11 +384,22 @@ export class EspnFootballService {
     const leagueInfo = this.getLeagueInfo(leagueCode);
     const primaryImage = espnArticle.images && espnArticle.images.length > 0 ? espnArticle.images[0] : null;
 
+    // Use high-quality football images from Unsplash as fallback
+    const fallbackImages = [
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop&crop=center',
+      'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop&crop=center'
+    ];
+    
+    const randomFallback = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+
     return {
       id: espnArticle.id.toString(),
       title: espnArticle.headline,
       description: espnArticle.description,
-      image: primaryImage ? primaryImage.url : '/images/placeholder-news.jpg',
+      image: primaryImage ? primaryImage.url : randomFallback,
       publishedAt: espnArticle.published,
       category: leagueInfo.name.toLowerCase().replace(/\s+/g, '-'),
       link: espnArticle.links?.web?.href || '#',
