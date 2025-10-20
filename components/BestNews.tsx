@@ -19,24 +19,18 @@ export default function BestNews({ selectedCategory, newsItems }: BestNewsProps)
   useEffect(() => {
     // Debug: log incoming news items per category
     try {
-      // Avoid noisy logs for huge arrays by mapping essentials
       // eslint-disable-next-line no-console
       console.log('[BestNews] incoming newsItems', {
         category,
         count: newsItems?.length || 0,
-        sample: (newsItems || []).slice(0, 5).map(n => ({
-          id: n.id,
-          title: n.title,
-          category: n.category,
-          league: n.league?.name,
-          publishedAt: n.publishedAt
-        }))
+        sample: (newsItems || []).slice(0, 5).map(n => ({ id: n.id, title: n.title }))
       })
     } catch {}
     fetchBestNews(category, newsItems)
   }, [category, newsItems])
 
-  if (isLoading) {
+  // If data still loading (including when list is empty), show loader card to avoid empty state flash
+  if (isLoading || !newsItems || newsItems.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}

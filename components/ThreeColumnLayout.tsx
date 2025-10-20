@@ -548,12 +548,12 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                   className="text-purple-300 hover:text-white transition-colors duration-200 p-1"
                 >
                   <ChevronDown className="w-3 h-3" />
-                </button>
+              </button>
               </div>
             </div>
           </div>
 
-            {/* Matches List */}
+          {/* Matches List */}
             <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
               {loading ? (
                 <div className="text-center py-4">
@@ -577,7 +577,7 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                   {/* Matches for current period */}
                   <div className="space-y-0">
                     {currentGroup[1].map((match: Match, index: number) => (
-                      <motion.div
+              <motion.div
                         key={`${match.id}-${currentGroup[0]}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -596,12 +596,12 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                                   (e.target as HTMLImageElement).src = '/placeholder-team.png';
                                 }}
                               />
-                            </div>
+                      </div>
                             <span className="text-xs text-white font-medium truncate text-center">
                               {match.homeTeam}
                             </span>
-                          </div>
-                          
+                    </div>
+                    
                           {/* Score - Centered */}
                           <div className="flex flex-col items-center mx-2 min-w-0">
                             <div className="text-sm font-bold text-white">
@@ -609,7 +609,7 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                                 ? `${match.homeScore} - ${match.awayScore}`
                                 : 'vs'
                               }
-                            </div>
+                      </div>
                             <div className={`text-xs px-1 py-0.5 rounded text-center ${
                               match.status === 'finished' 
                                 ? 'bg-green-600/30 text-green-300' 
@@ -620,9 +620,9 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                               {match.status === 'finished' ? 'FT' : 
                                match.status === 'live' ? 'LIVE' : 
                                match.time}
-                            </div>
-                          </div>
-                          
+                    </div>
+                  </div>
+                  
                           {/* Away Team */}
                           <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
                             <div className="w-10 h-10 rounded-full shadow-lg  p-1 bg-white/10">
@@ -639,13 +639,13 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                               {match.awayTeam}
                             </span>
                           </div>
-                        </div>
+                    </div>
                       </motion.div>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
+          </div>
 
           {/* View All Matches Button */}
           <div className="p-4 border-t border-purple-700/30">
@@ -783,7 +783,7 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                     className="text-purple-300 hover:text-white transition-colors duration-200 p-1"
                   >
                     <ChevronDown className="w-3 h-3" />
-                  </button>
+                </button>
                 </div>
               </div>
             </div>
@@ -812,7 +812,7 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                   {/* Matches for current period */}
                   <div className="space-y-0">
                     {currentGroup[1].map((match: Match, index: number) => (
-                      <motion.div
+                <motion.div
                         key={`${match.id}-${currentGroup[0]}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -831,12 +831,12 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                                   (e.target as HTMLImageElement).src = '/placeholder-team.png';
                                 }}
                               />
-                            </div>
+                        </div>
                             <span className="text-sm text-white font-medium truncate text-center">
                               {match.homeTeam}
                             </span>
-                          </div>
-                          
+                      </div>
+                      
                           {/* Score - Centered */}
                           <div className="flex flex-col items-center mx-4 min-w-0">
                             <div className="text-lg font-bold text-white">
@@ -844,7 +844,7 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                                 ? `${match.homeScore} - ${match.awayScore}`
                                 : 'vs'
                               }
-                            </div>
+                        </div>
                             <div className={`text-xs px-2 py-1 rounded text-center ${
                               match.status === 'finished' 
                                 ? 'bg-green-600/30 text-green-300' 
@@ -855,9 +855,9 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                               {match.status === 'finished' ? 'FT' : 
                                match.status === 'live' ? 'LIVE' : 
                                match.time}
-                            </div>
-                          </div>
-                          
+                      </div>
+                    </div>
+                    
                           {/* Away Team */}
                           <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
                             <div className="w-10 h-10 rounded-full shadow-lg  p-1 bg-white/10">
@@ -873,8 +873,8 @@ export default function ThreeColumnLayout({ selectedCategory, selectedLeague: pr
                             <span className="text-sm text-white font-medium truncate text-center">
                               {match.awayTeam}
                             </span>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
                       </motion.div>
                     ))}
                   </div>
