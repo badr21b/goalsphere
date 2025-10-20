@@ -49,6 +49,133 @@ export interface FootballApi {
   integration_notes: string
 }
 
+// Football Data Types
+export interface FootballMatch {
+  fixture: {
+    id: number
+    referee: string
+    timezone: string
+    date: string
+    timestamp: number
+    periods: {
+      first: number
+      second: number
+    }
+    venue: {
+      id: number
+      name: string
+      city: string
+    }
+    status: {
+      long: string
+      short: string
+      elapsed: number | null
+      extra: number | null
+    }
+  }
+  league: {
+    id: number
+    name: string
+    country: string
+    logo: string
+    flag: string
+    season: number
+    round: string
+    standings: boolean
+  }
+  teams: {
+    home: {
+      id: number
+      name: string
+      logo: string
+    }
+    away: {
+      id: number
+      name: string
+      logo: string
+    }
+  }
+  goals: {
+    home: number | null
+    away: number | null
+  }
+  score: {
+    halftime: {
+      home: number | null
+      away: number | null
+    }
+    fulltime: {
+      home: number | null
+      away: number | null
+    }
+    extratime: {
+      home: number | null
+      away: number | null
+    }
+    penalty: {
+      home: number | null
+      away: number | null
+    }
+  }
+}
+
+export interface LeagueStanding {
+  rank: number
+  team: {
+    id: number
+    name: string
+    logo: string
+  }
+  points: number
+  goalsDiff: number
+  group: string
+  form: string
+  status: string
+  description: string
+  all: {
+    played: number
+    win: number
+    draw: number
+    lose: number
+    goals: {
+      for: number
+      against: number
+    }
+  }
+  home: {
+    played: number
+    win: number
+    draw: number
+    lose: number
+    goals: {
+      for: number
+      against: number
+    }
+  }
+  away: {
+    played: number
+    win: number
+    draw: number
+    lose: number
+    goals: {
+      for: number
+      against: number
+    }
+  }
+}
+
+export interface NewsArticle {
+  id: string
+  title: string
+  content: string
+  summary: string
+  category: string
+  publishedAt: string
+  thumbnail: string
+  tags: string[]
+  source: string
+}
+
 export interface DataSchema {
   description: string
   required_fields: string[]

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Trophy, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
 import { useTranslations } from '@/hooks/useTranslations'
+import { LeagueSlug, LEAGUES } from '@/lib/services/leagues'
 
 interface Match {
   id: string
@@ -93,7 +94,11 @@ const mockMatches: Match[] = [
   },
 ]
 
-export default function LiveScoresTicker() {
+interface LiveScoresTickerProps {
+  leagueSlug?: LeagueSlug | 'all'
+}
+
+export default function LiveScoresTicker({ leagueSlug = 'premier-league' }: LiveScoresTickerProps) {
   const t = useTranslations()
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
   const [liveMatches, setLiveMatches] = useState<Match[]>([])
@@ -101,101 +106,111 @@ export default function LiveScoresTicker() {
   const [scrollPosition, setScrollPosition] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Fetch real Premier League data
+  // Fetch real league data
   useEffect(() => {
-    const fetchPremierLeagueData = async () => {
+    const fetchLeagueData = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/football/premier-league')
-        if (!response.ok) {
-          throw new Error('Failed to fetch Premier League data')
+        let convertedMatches: Match[] = []
+
+        if (leagueSlug === 'all') {
+          const slugs = Object.keys(LEAGUES) as LeagueSlug[]
+          for (const slug of slugs) {
+            const resp = await fetch(`/api/football/${slug}`)
+            if (!resp.ok) continue
+            const data = await resp.json()
+            const toMatches = (arr: any[], statusOverride?: 'live' | 'upcoming' | 'finished') => (arr || []).map((match: any) => ({
+              id: match.fixture.id.toString(),
+              homeTeam: match.teams.home.name,
+              awayTeam: match.teams.away.name,
+              homeLogo: match.teams.home.logo,
+              awayLogo: match.teams.away.logo,
+              homeScore: match.goals.home,
+              awayScore: match.goals.away,
+              status: statusOverride ?? (match.fixture.status.short === 'LIVE' ? 'live' as const : match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const),
+              league: match.league.name,
+              time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+            }))
+            convertedMatches = convertedMatches.concat(
+              toMatches(data.data.liveMatches, 'live'),
+              toMatches(data.data.todaysMatches),
+              toMatches((data.data.thisWeekMatches || []).slice(0, 3))
+            )
+          }
+        } else {
+          const response = await fetch(`/api/football/${leagueSlug}`)
+          if (!response.ok) {
+            throw new Error(`Failed to fetch ${leagueSlug} data`)
+          }
+          const data = await response.json()
+          convertedMatches = [
+            ...(data.data.liveMatches || []).map((match: any) => ({
+              id: match.fixture.id.toString(),
+              homeTeam: match.teams.home.name,
+              awayTeam: match.teams.away.name,
+              homeLogo: match.teams.home.logo,
+              awayLogo: match.teams.away.logo,
+              homeScore: match.goals.home,
+              awayScore: match.goals.away,
+              status: 'live' as const,
+              league: match.league.name,
+              time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              })
+            })),
+            ...(data.data.todaysMatches || []).map((match: any) => ({
+              id: match.fixture.id.toString(),
+              homeTeam: match.teams.home.name,
+              awayTeam: match.teams.away.name,
+              homeLogo: match.teams.home.logo,
+              awayLogo: match.teams.away.logo,
+              homeScore: match.goals.home,
+              awayScore: match.goals.away,
+              status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
+                     match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
+              league: match.league.name,
+              time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              })
+            })),
+            ...(data.data.thisWeekMatches || []).slice(0, 3).map((match: any) => ({
+              id: match.fixture.id.toString(),
+              homeTeam: match.teams.home.name,
+              awayTeam: match.teams.away.name,
+              homeLogo: match.teams.home.logo,
+              awayLogo: match.teams.away.logo,
+              homeScore: match.goals.home,
+              awayScore: match.goals.away,
+              status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
+                     match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
+              league: match.league.name,
+              time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              })
+            }))
+          ]
         }
-        
-        const data = await response.json()
-        
-        // Convert API data to our Match interface
-        const convertedMatches: Match[] = [
-          ...(data.data.liveMatches || []).map((match: any) => ({
-            id: match.fixture.id.toString(),
-            homeTeam: match.teams.home.name,
-            awayTeam: match.teams.away.name,
-            homeLogo: match.teams.home.logo,
-            awayLogo: match.teams.away.logo,
-            homeScore: match.goals.home,
-            awayScore: match.goals.away,
-            status: 'live' as const,
-            league: match.league.name,
-            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            })
-          })),
-          ...(data.data.todaysMatches || []).map((match: any) => ({
-            id: match.fixture.id.toString(),
-            homeTeam: match.teams.home.name,
-            awayTeam: match.teams.away.name,
-            homeLogo: match.teams.home.logo,
-            awayLogo: match.teams.away.logo,
-            homeScore: match.goals.home,
-            awayScore: match.goals.away,
-            status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
-                   match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
-            league: match.league.name,
-            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            })
-          })),
-          ...(data.data.thisWeekMatches || []).slice(0, 3).map((match: any) => ({
-            id: match.fixture.id.toString(),
-            homeTeam: match.teams.home.name,
-            awayTeam: match.teams.away.name,
-            homeLogo: match.teams.home.logo,
-            awayLogo: match.teams.away.logo,
-            homeScore: match.goals.home,
-            awayScore: match.goals.away,
-            status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
-                   match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
-            league: match.league.name,
-            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            })
-          })),
-          ...(data.data.previousWeekMatches || []).slice(0, 2).map((match: any) => ({
-            id: match.fixture.id.toString(),
-            homeTeam: match.teams.home.name,
-            awayTeam: match.teams.away.name,
-            homeLogo: match.teams.home.logo,
-            awayLogo: match.teams.away.logo,
-            homeScore: match.goals.home,
-            awayScore: match.goals.away,
-            status: match.fixture.status.short === 'LIVE' ? 'live' as const : 
-                   match.fixture.status.short === 'FT' ? 'finished' as const : 'upcoming' as const,
-            league: match.league.name,
-            time: new Date(match.fixture.date).toLocaleTimeString('en-GB', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              hour12: false 
-            })
-          }))
-        ]
-        
-        setLiveMatches(convertedMatches)
+
+        // Deduplicate by id and sort soonest first
+        const unique = convertedMatches.filter((m, i, arr) => i === arr.findIndex(x => x.id === m.id))
+        unique.sort((a, b) => a.time.localeCompare(b.time))
+        setLiveMatches(unique)
       } catch (error) {
-        console.error('Error fetching Premier League data:', error)
-        // Fallback to mock data on error
+        console.error(`Error fetching ${leagueSlug} data:`, error)
         setLiveMatches(mockMatches)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchPremierLeagueData()
-  }, [])
+    fetchLeagueData()
+  }, [leagueSlug])
 
   useEffect(() => {
     // Auto-rotate matches every 5 seconds
@@ -375,7 +390,7 @@ export default function LiveScoresTicker() {
                       alt={liveMatches[currentMatchIndex].homeTeam}
                       className="w-full h-full rounded-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                        (e.target as HTMLImageElement).src = '/images/placeholder-team.png';
                       }}
                     />
                   </div>
@@ -399,7 +414,7 @@ export default function LiveScoresTicker() {
                       alt={liveMatches[currentMatchIndex].awayTeam}
                       className="w-full h-full rounded-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                        (e.target as HTMLImageElement).src = '/images/placeholder-team.png';
                       }}
                     />
                   </div>
@@ -456,7 +471,7 @@ export default function LiveScoresTicker() {
                           alt={match.homeTeam}
                           className="w-full h-full rounded-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                            (e.target as HTMLImageElement).src = '/images/placeholder-team.png';
                           }}
                         />
                       </div>
@@ -476,7 +491,7 @@ export default function LiveScoresTicker() {
                           alt={match.awayTeam}
                           className="w-full h-full rounded-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                            (e.target as HTMLImageElement).src = '/images/placeholder-team.png';
                           }}
                         />
                       </div>
@@ -552,7 +567,7 @@ export default function LiveScoresTicker() {
                           alt={match.homeTeam}
                           className="w-full h-full rounded-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                            (e.target as HTMLImageElement).src = '/images/placeholder-team.png';
                           }}
                         />
                       </div>
@@ -572,7 +587,7 @@ export default function LiveScoresTicker() {
                           alt={match.awayTeam}
                           className="w-full h-full rounded-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/placeholder-team.png';
+                            (e.target as HTMLImageElement).src = '/images/placeholder-team.png';
                           }}
                         />
                       </div>

@@ -24,6 +24,20 @@ export interface GeneratedContent {
   source: 'gemini_generated';
 }
 
+export interface BestNewsRequest {
+  category: string;
+  newsItems: Array<{
+    title: string;
+    description: string;
+    image: string;
+    publishedAt: string;
+    league: {
+      name: string;
+      country: string;
+    };
+  }>;
+}
+
 export interface LiveMatchData {
   match_id: string;
   home_team: string;
@@ -522,6 +536,136 @@ Return as JSON:
       tags: [topic.toLowerCase()],
       source: 'gemini_generated'
     };
+  }
+
+  /**
+   * Generate best news from a list of news items
+   */
+  async generateBestNews(request: BestNewsRequest): Promise<GeneratedContent | null> {
+    try {
+      if (!request.newsItems || request.newsItems.length === 0) {
+        return null;
+      }
+
+      const newsList = request.newsItems.map(item =>
+        `Title: ${item.title}\nDescription: ${item.description}\nLeague: ${item.league.name} (${item.league.country})\nImage: ${item.image}\nPublished: ${item.publishedAt}`
+      ).join('\n\n---\n\n');
+
+      const prompt = `
+        You are an expert football journalist. Analyze the following recent news articles related to the category "${request.category}" and identify the single most important, impactful, or interesting news story.
+
+        Based on the selected best news story, rewrite it in a concise, engaging, and professional tone suitable for a "featured news" section on a sports website. The rewritten news should be around 100-150 words.
+
+        Focus on the core information, highlight its significance, and make it compelling for a reader.
+
+        Here are the news articles to consider:
+        ${newsList}
+
+        Please provide the output in a JSON format with the following structure. Ensure the 'image' field uses the URL from the *original* best news item you selected. The 'category' should be derived from the original news item's league name, formatted as a slug (e.g., "premier-league").
+
+        {
+          "title": "Rewritten headline of the best news",
+          "content": "Rewritten content of the best news (around 100-150 words)",
+          "summary": "A short summary of the rewritten content (around 30-50 words)",
+          "category": "slug-of-original-news-league",
+          "publishedAt": "ISO string of original news published date",
+          "thumbnail": "URL of the image from the original best news item",
+          "tags": ["important", "featured", "football"],
+          "source": "gemini_generated"
+        }
+      `;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      // Try to coerce JSON if the model wrapped it in code fences or extra prose
+      let parsedContent: any | null = null;
+      try {
+        // Remove markdown code fences if present
+        const withoutFences = text
+          .replace(/```json[\s\S]*?\n/, '```')
+          .replace(/```/g, '')
+          .trim();
+        const jsonSliceMatch = withoutFences.match(/\{[\s\S]*\}/);
+        const jsonCandidate = jsonSliceMatch ? jsonSliceMatch[0] : withoutFences;
+        parsedContent = JSON.parse(jsonCandidate);
+      } catch {}
+
+      try {
+        if (parsedContent.title && parsedContent.content && parsedContent.summary && parsedContent.thumbnail) {
+          return {
+            ...parsedContent,
+            source: 'gemini_generated',
+            publishedAt: parsedContent.publishedAt || new Date().toISOString(),
+            tags: parsedContent.tags || [],
+          };
+        }
+      } catch (jsonError) {
+        console.warn('Gemini response for best news was not valid JSON, attempting to extract text:', jsonError);
+      }
+
+      // Fallback if not JSON or invalid JSON
+      return {
+        title: `Featured News for ${request.category}`,
+        content: text,
+        summary: text.substring(0, 150) + '...',
+        category: request.category,
+        publishedAt: new Date().toISOString(),
+        tags: ['gemini', 'featured'],
+        source: 'gemini_generated',
+        thumbnail: request.newsItems[0]?.image || '/images/placeholder-news.jpg',
+      };
+
+    } catch (error) {
+      console.error('Error generating best news with Gemini:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate best news for multiple categories in one request to reduce latency
+   */
+  async generateBestNewsBatch(requests: BestNewsRequest[]): Promise<Record<string, GeneratedContent | null>> {
+    const results: Record<string, GeneratedContent | null> = {}
+    try {
+      // Compose one batched prompt with clear separators
+      const parts = requests.map((req, idx) => {
+        const list = req.newsItems.map(item => `- ${item.title} | ${item.league.name} | ${item.publishedAt}\n${item.description}` ).join('\n')
+        return `SECTION ${idx + 1} - CATEGORY: ${req.category.toUpperCase()}\n${list}`
+      }).join('\n\n')
+
+      const prompt = `You are an expert football editor. For each section below, pick exactly ONE most important story and rewrite it (100-150 words).\n\n${parts}\n\nReturn STRICT JSON as an array where each entry matches the input order:\n[{"category":"<slug>","title":"...","content":"...","summary":"...","thumbnail":"<image-url>","publishedAt":"<iso>","tags":["featured"],"source":"gemini_generated"}]`;
+
+      const result = await this.model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+
+      // Coerce JSON like above
+      let parsed: any[] | null = null
+      try {
+        const cleaned = text.replace(/```json[\s\S]*?\n/, '```').replace(/```/g, '').trim()
+        const arrayMatch = cleaned.match(/\[[\s\S]*\]/)
+        const candidate = arrayMatch ? arrayMatch[0] : cleaned
+        parsed = JSON.parse(candidate)
+      } catch {}
+
+      if (Array.isArray(parsed)) {
+        parsed.forEach((item: any) => {
+          if (item && item.category) {
+            results[item.category] = {
+              ...item,
+              publishedAt: item.publishedAt || new Date().toISOString(),
+              source: 'gemini_generated',
+              tags: item.tags || []
+            }
+          }
+        })
+      }
+    } catch (e) {
+      console.error('Error in generateBestNewsBatch', e)
+    }
+    return results
   }
 }
 

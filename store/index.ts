@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { baseApi } from './api/baseApi'
+import bestNewsReducer from './slices/bestNewsSlice'
 // Import all API slices to ensure they're registered with baseApi
 import './api/articlesApi'
 import './api/liveScoresApi'
@@ -9,6 +10,7 @@ import './api/adUnitsApi'
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
+    bestNews: bestNewsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

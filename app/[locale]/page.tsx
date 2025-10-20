@@ -11,6 +11,7 @@ import InterviewsCarousel from '@/components/InterviewsCarousel'
 import LatestVideos from '@/components/LatestVideos'
 import LiveScoresTicker from '@/components/LiveScoresTicker'
 import { useTranslations } from '@/hooks/useTranslations'
+import { LeagueSlug } from '@/lib/services/leagues'
 
 const categories = [
   'transfers',
@@ -27,6 +28,7 @@ const categories = [
 export default function HomePage() {
   const t = useTranslations()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedLeague, setSelectedLeague] = useState<LeagueSlug>('premier-league')
 
   // Mock loading states for development
   const headerLoading = false
@@ -70,7 +72,7 @@ export default function HomePage() {
       <HeaderNoI18n />
 
       {/* Live Scores Ticker */}
-      <LiveScoresTicker />
+      <LiveScoresTicker leagueSlug={'all'} />
 
       {/* Header Banner Ad */}
       {headerLoading && (
@@ -129,7 +131,11 @@ export default function HomePage() {
         </section>
 
         {/* Three Column Layout */}
-        <ThreeColumnLayout selectedCategory={selectedCategory} />
+        <ThreeColumnLayout 
+          selectedCategory={selectedCategory} 
+          selectedLeague={selectedLeague}
+          onLeagueChange={setSelectedLeague}
+        />
 
         {/* In-Content Ad after main content */}
         {inContentLoading && (

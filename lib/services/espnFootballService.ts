@@ -1,7 +1,10 @@
 import { FootballMatch, LeagueStanding, NewsArticle } from '@/lib/types/api';
+import { FootballNews } from '@/lib/types';
 
 export class EspnFootballService {
-  private baseUrl = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1';
+  private getBaseUrl(leagueCode: string = 'eng.1') {
+    return `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueCode}`;
+  }
   private cache = new Map<string, { data: any; timestamp: number }>();
   private CACHE_DURATION = 60000; // 1 minute cache
 
@@ -20,11 +23,12 @@ export class EspnFootballService {
     return cached ? cached.data : null;
   }
 
-  private async makeRequest(endpoint: string): Promise<any> {
-    const url = `${this.baseUrl}${endpoint}`;
+  private async makeRequest(endpoint: string, leagueCode: string = 'eng.1'): Promise<any> {
+    const url = `${this.getBaseUrl(leagueCode)}${endpoint}`;
+    const cacheKey = `${leagueCode}-${endpoint}`;
     
-    if (this.isCacheValid(endpoint)) {
-      return this.getCache(endpoint);
+    if (this.isCacheValid(cacheKey)) {
+      return this.getCache(cacheKey);
     }
 
     try {
@@ -35,7 +39,7 @@ export class EspnFootballService {
       }
 
       const data = await response.json();
-      this.setCache(endpoint, data);
+      this.setCache(cacheKey, data);
       return data;
     } catch (error) {
       console.error('ESPN API request failed:', error);
@@ -43,7 +47,22 @@ export class EspnFootballService {
     }
   }
 
-  private convertEspnMatchToFootballMatch(espnMatch: any): FootballMatch {
+  private getLeagueInfo(leagueCode: string) {
+    const leagueMap: Record<string, any> = {
+      'eng.1': { id: 39, name: 'Premier League', country: 'England', logo: 'https://media.api-sports.io/football/leagues/39.png', flag: 'https://media.api-sports.io/flags/gb-eng.svg' },
+      'esp.1': { id: 140, name: 'La Liga', country: 'Spain', logo: 'https://media.api-sports.io/football/leagues/140.png', flag: 'https://media.api-sports.io/flags/es.svg' },
+      'ita.1': { id: 135, name: 'Serie A', country: 'Italy', logo: 'https://media.api-sports.io/football/leagues/135.png', flag: 'https://media.api-sports.io/flags/it.svg' },
+      'ger.1': { id: 78, name: 'Bundesliga', country: 'Germany', logo: 'https://media.api-sports.io/football/leagues/78.png', flag: 'https://media.api-sports.io/flags/de.svg' },
+      'fra.1': { id: 61, name: 'Ligue 1', country: 'France', logo: 'https://media.api-sports.io/football/leagues/61.png', flag: 'https://media.api-sports.io/flags/fr.svg' },
+      'uefa.champions': { id: 2, name: 'Champions League', country: 'Europe', logo: 'https://media.api-sports.io/football/leagues/2.png', flag: 'https://media.api-sports.io/flags/eu.svg' },
+      'uefa.europa': { id: 3, name: 'Europa League', country: 'Europe', logo: 'https://media.api-sports.io/football/leagues/3.png', flag: 'https://media.api-sports.io/flags/eu.svg' },
+      'ksa.1': { id: 307, name: 'Saudi Pro League', country: 'Saudi Arabia', logo: 'https://media.api-sports.io/football/leagues/307.png', flag: 'https://media.api-sports.io/flags/sa.svg' }
+    };
+    
+    return leagueMap[leagueCode] || leagueMap['eng.1'];
+  }
+
+  private convertEspnMatchToFootballMatch(espnMatch: any, leagueCode: string = 'eng.1'): FootballMatch {
     const competition = espnMatch.competitions[0];
     const homeTeam = competition.competitors.find((c: any) => c.homeAway === 'home');
     const awayTeam = competition.competitors.find((c: any) => c.homeAway === 'away');
@@ -55,6 +74,8 @@ export class EspnFootballService {
     // Only show scores for finished or live matches
     const homeScore = (isMatchFinished || isMatchLive) && homeTeam.score ? parseInt(homeTeam.score) : null;
     const awayScore = (isMatchFinished || isMatchLive) && awayTeam.score ? parseInt(awayTeam.score) : null;
+    
+    const leagueInfo = this.getLeagueInfo(leagueCode);
     
     return {
       fixture: {
@@ -80,11 +101,11 @@ export class EspnFootballService {
         }
       },
       league: {
-        id: 39,
-        name: 'Premier League',
-        country: 'England',
-        logo: 'https://media.api-sports.io/football/leagues/39.png',
-        flag: 'https://media.api-sports.io/flags/gb-eng.svg',
+        id: leagueInfo.id,
+        name: leagueInfo.name,
+        country: leagueInfo.country,
+        logo: leagueInfo.logo,
+        flag: leagueInfo.flag,
         season: 2025,
         round: 'Regular Season',
         standings: true
@@ -141,33 +162,33 @@ export class EspnFootballService {
     }
   }
 
-  async getLiveMatches(): Promise<FootballMatch[]> {
+  async getLiveMatches(leagueCode: string = 'eng.1'): Promise<FootballMatch[]> {
     try {
-      const data = await this.makeRequest('/scoreboard');
+      const data = await this.makeRequest('/scoreboard', leagueCode);
       const liveMatches = data.events.filter((event: any) => 
         event.status.type.name === 'STATUS_IN_PROGRESS'
       );
       
-      return liveMatches.map((match: any) => this.convertEspnMatchToFootballMatch(match));
+      return liveMatches.map((match: any) => this.convertEspnMatchToFootballMatch(match, leagueCode));
     } catch (error) {
       console.error('Failed to fetch live matches:', error);
       return [];
     }
   }
 
-  async getTodaysMatches(): Promise<FootballMatch[]> {
+  async getTodaysMatches(leagueCode: string = 'eng.1'): Promise<FootballMatch[]> {
     try {
       const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
-      const data = await this.makeRequest(`/scoreboard?dates=${today}-${today}`);
+      const data = await this.makeRequest(`/scoreboard?dates=${today}-${today}`, leagueCode);
       
-      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match));
+      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match, leagueCode));
     } catch (error) {
       console.error('Failed to fetch today\'s matches:', error);
       return [];
     }
   }
 
-  async getThisWeekMatches(): Promise<FootballMatch[]> {
+  async getThisWeekMatches(leagueCode: string = 'eng.1'): Promise<FootballMatch[]> {
     try {
       const now = new Date();
       const startOfWeek = new Date(now);
@@ -182,16 +203,16 @@ export class EspnFootballService {
       const startDate = startOfWeek.toISOString().split('T')[0].replace(/-/g, '');
       const endDate = endOfWeek.toISOString().split('T')[0].replace(/-/g, '');
       
-      const data = await this.makeRequest(`/scoreboard?dates=${startDate}-${endDate}`);
+      const data = await this.makeRequest(`/scoreboard?dates=${startDate}-${endDate}`, leagueCode);
       
-      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match));
+      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match, leagueCode));
     } catch (error) {
       console.error('Failed to fetch this week\'s matches:', error);
       return [];
     }
   }
 
-  async getNextWeekMatches(): Promise<FootballMatch[]> {
+  async getNextWeekMatches(leagueCode: string = 'eng.1'): Promise<FootballMatch[]> {
     try {
       const now = new Date();
       const nextWeekStart = new Date(now);
@@ -206,16 +227,16 @@ export class EspnFootballService {
       const startDate = nextWeekStart.toISOString().split('T')[0].replace(/-/g, '');
       const endDate = nextWeekEnd.toISOString().split('T')[0].replace(/-/g, '');
       
-      const data = await this.makeRequest(`/scoreboard?dates=${startDate}-${endDate}`);
+      const data = await this.makeRequest(`/scoreboard?dates=${startDate}-${endDate}`, leagueCode);
       
-      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match));
+      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match, leagueCode));
     } catch (error) {
       console.error('Failed to fetch next week\'s matches:', error);
       return [];
     }
   }
 
-  async getThisMonthMatches(): Promise<FootballMatch[]> {
+  async getThisMonthMatches(leagueCode: string = 'eng.1'): Promise<FootballMatch[]> {
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -225,20 +246,20 @@ export class EspnFootballService {
       const startDate = startOfMonth.toISOString().split('T')[0].replace(/-/g, '');
       const endDate = endOfMonth.toISOString().split('T')[0].replace(/-/g, '');
       
-      const data = await this.makeRequest(`/scoreboard?dates=${startDate}-${endDate}`);
+      const data = await this.makeRequest(`/scoreboard?dates=${startDate}-${endDate}`, leagueCode);
       
-      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match));
+      return data.events.map((match: any) => this.convertEspnMatchToFootballMatch(match, leagueCode));
     } catch (error) {
       console.error('Failed to fetch this month\'s matches:', error);
       return [];
     }
   }
 
-  async getPreviousWeekMatches(): Promise<FootballMatch[]> {
+  async getPreviousWeekMatches(leagueCode: string = 'eng.1'): Promise<FootballMatch[]> {
     try {
       // Since ESPN API might not have historical data, let's use thisWeekMatches
       // and filter to show matches from 1 week ago by modifying dates
-      const thisWeekMatches = await this.getThisWeekMatches();
+      const thisWeekMatches = await this.getThisWeekMatches(leagueCode);
       
       // Filter and modify dates to show as 1 week ago
       const previousWeekMatches = thisWeekMatches.slice(0, 5).map((match: any) => {
@@ -265,9 +286,9 @@ export class EspnFootballService {
     }
   }
 
-  async getLeagueStandings(): Promise<LeagueStanding[]> {
+  async getLeagueStandings(leagueCode: string = 'eng.1'): Promise<LeagueStanding[]> {
     try {
-      const data = await this.makeRequest('/standings');
+      const data = await this.makeRequest('/standings', leagueCode);
       const standings: LeagueStanding[] = [];
       
       if (data.children && data.children[0] && data.children[0].standings) {
@@ -293,8 +314,8 @@ export class EspnFootballService {
             goalsDiff: pointsFor - pointsAgainst,
             group: 'Premier League',
             form: 'WWLWD',
-            status: index < 4 ? 'Champions League' : index < 6 ? 'Europa League' : index >= entries.length - 3 ? 'Relegation' : null,
-            description: index < 4 ? 'Champions League' : index < 6 ? 'Europa League' : index >= entries.length - 3 ? 'Relegation' : null,
+            status: index < 4 ? 'Champions League' : index < 6 ? 'Europa League' : index >= entries.length - 3 ? 'Relegation' : 'Mid-table',
+            description: index < 4 ? 'Champions League' : index < 6 ? 'Europa League' : index >= entries.length - 3 ? 'Relegation' : 'Mid-table',
             all: {
               played: wins + losses + ties,
               win: wins,
@@ -336,9 +357,9 @@ export class EspnFootballService {
     }
   }
 
-  async getTeams(): Promise<any[]> {
+  async getTeams(leagueCode: string = 'eng.1'): Promise<any[]> {
     try {
-      const data = await this.makeRequest('/teams');
+      const data = await this.makeRequest('/teams', leagueCode);
       return data.sports[0].leagues[0].teams.map((team: any) => ({
         team: {
           id: team.team.id,
@@ -359,9 +380,40 @@ export class EspnFootballService {
     }
   }
 
-  async getNews(): Promise<NewsArticle[]> {
-    // ESPN doesn't provide news, so we'll return empty array
-    return [];
+  private convertEspnNewsToFootballNews(espnArticle: any, leagueCode: string): FootballNews {
+    const leagueInfo = this.getLeagueInfo(leagueCode);
+    const primaryImage = espnArticle.images && espnArticle.images.length > 0 ? espnArticle.images[0] : null;
+
+    return {
+      id: espnArticle.id.toString(),
+      title: espnArticle.headline,
+      description: espnArticle.description,
+      image: primaryImage ? primaryImage.url : '/images/placeholder-news.jpg',
+      publishedAt: espnArticle.published,
+      category: leagueInfo.name.toLowerCase().replace(/\s+/g, '-'),
+      link: espnArticle.links?.web?.href || '#',
+      isBreaking: espnArticle.isBreakingNews || false,
+      league: {
+        id: leagueInfo.id,
+        name: leagueInfo.name,
+        country: leagueInfo.country,
+        logo: leagueInfo.logo,
+        flag: leagueInfo.flag,
+      }
+    };
+  }
+
+  async getNews(leagueCode: string = 'eng.1'): Promise<FootballNews[]> {
+    try {
+      const data = await this.makeRequest('/news', leagueCode);
+      if (data && data.articles) {
+        return data.articles.map((article: any) => this.convertEspnNewsToFootballNews(article, leagueCode));
+      }
+      return [];
+    } catch (error) {
+      console.error(`Error fetching news for ${leagueCode}:`, error);
+      return [];
+    }
   }
 }
 

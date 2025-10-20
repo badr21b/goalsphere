@@ -88,3 +88,21 @@ export interface AdUnit {
   isActive: boolean;
   targetCategory?: ArticleCategory;
 }
+
+export interface FootballNews {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  publishedAt: string;
+  category: string;
+  link: string;
+  isBreaking: boolean;
+  league: {
+    id: number;
+    name: string;
+    country: string;
+    logo: string;
+    flag: string;
+  };
+}
